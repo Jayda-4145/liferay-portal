@@ -6,13 +6,15 @@ definition {
 	@description = "Ensure that the super admin can login successful."
 	@priority = "5"
 	test SuperAdminLogin {
+		for (var userName : list "user01,user02,user03"){
 			MyFirstMacro.login(
 				password = "test",
 				url = "http://localhost:8080",
-				userEmailAddress = "test@liferay.com",
+				userEmailAddress = "${userName}@liferay.com",
 				userPasswordReminderAnswer = "1");
 
 			MyFirstMacro.signOut(signout = "Sign Out");
+		}
 	}
 
 }
