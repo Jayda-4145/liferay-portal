@@ -1,0 +1,47 @@
+definition {
+
+	macro login {
+		Open(locator1 = "${url}");
+
+		Click(locator1 = "UserBar#USER_SIGN_IN");
+
+		Type(
+			locator1 = "TextInput#EMAIL_ADDRESS",
+			value1 = "${userEmailAddress}");
+
+		Type(
+			locator1 = "TextInput#PASSWORD",
+			value1 = "${password}");
+
+		Click(
+			key_text = "Sign In",
+			locator1 = "Button#ANY");
+
+		if (IsElementPresent(key_text = "I Agree", locator1 = "Button#ANY")) {
+			Click(
+				key_text = "I Agree",
+				locator1 = "Button#ANY");
+		}
+
+		if (IsElementPresent(locator1 = "TextInput#ANSWER")) {
+			Type(
+				locator1 = "TextInput#ANSWER",
+				value1 = "${userPasswordReminderAnswer}");
+
+			Click(
+				key_text = "Save",
+				locator1 = "Button#ANY");
+		}
+	}
+
+	macro signOut {
+		if (IsElementPresent(locator1 = "UserBar#USER_AVATAR_IMAGE")) {
+			Click(locator1 = "UserBar#USER_AVATAR_IMAGE");
+			
+			Click(
+				locator1 = "UserBar#USER_AVATAR_DROPDOWN_SIGNOUT",
+				value1 = "${signout}");
+		}
+	}
+	
+}
