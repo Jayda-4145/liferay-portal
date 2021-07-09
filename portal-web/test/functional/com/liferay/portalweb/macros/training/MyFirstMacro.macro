@@ -23,13 +23,13 @@ definition {
 				locator1 = "Button#ANY");
 
 			if (IsElementPresent(locator1 = "TextInput#ANSWER")) {
-			Type(
-				locator1 = "TextInput#ANSWER",
-				value1 = "${userPasswordReminderAnswer}");
+				Type(
+					locator1 = "TextInput#ANSWER",
+					value1 = "${userPasswordReminderAnswer}");
 
-			Click(
-				key_text = "Save",
-				locator1 = "Button#ANY");
+				Click(
+					key_text = "Save",
+					locator1 = "Button#ANY");
 			}
 		}
 	}
