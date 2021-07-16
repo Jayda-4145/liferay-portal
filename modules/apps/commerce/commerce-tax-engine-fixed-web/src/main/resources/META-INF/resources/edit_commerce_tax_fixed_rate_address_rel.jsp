@@ -20,9 +20,6 @@
 CommerceTaxFixedRateAddressRelsDisplayContext commerceTaxFixedRateAddressRelsDisplayContext = (CommerceTaxFixedRateAddressRelsDisplayContext)request.getAttribute(WebKeys.PORTLET_DISPLAY_CONTEXT);
 
 CommerceTaxFixedRateAddressRel commerceTaxFixedRateAddressRel = commerceTaxFixedRateAddressRelsDisplayContext.getCommerceTaxFixedRateAddressRel();
-
-long countryId = commerceTaxFixedRateAddressRelsDisplayContext.getCountryId();
-long regionId = commerceTaxFixedRateAddressRelsDisplayContext.getRegionId();
 %>
 
 <portlet:actionURL name="/commerce_tax_methods/edit_commerce_tax_fixed_rate_address_rel" var="editCommerceTaxFixedRateAddressRelActionURL" />
@@ -54,40 +51,15 @@ long regionId = commerceTaxFixedRateAddressRelsDisplayContext.getRegionId();
 	</c:otherwise>
 </c:choose>
 
-<aui:script use="aui-base,liferay-dynamic-select">
-	new Liferay.DynamicSelect([
-		{
-			select: '<portlet:namespace />countryId',
-			selectData: function (callback) {
-				Liferay.Service(
-					'/country/get-company-countries',
-					{
-						active: true,
-						companyId: <%= company.getCompanyId() %>,
-					},
-					callback
-				);
-			},
-			selectDesc: 'nameCurrentValue',
-			selectId: 'countryId',
-			selectSort: '<%= true %>',
-			selectVal: '<%= countryId %>',
-		},
-		{
-			select: '<portlet:namespace />regionId',
-			selectData: function (callback, selectKey) {
-				Liferay.Service(
-					'/region/get-regions',
-					{
-						active: true,
-						countryId: Number(selectKey),
-					},
-					callback
-				);
-			},
-			selectDesc: 'name',
-			selectId: 'regionId',
-			selectVal: '<%= regionId %>',
-		},
-	]);
-</aui:script>
+<liferay-frontend:component
+	context='<%=
+		HashMapBuilder.<String, Object>put(
+			"companyId", company.getCompanyId()
+		).put(
+			"countryId", commerceTaxFixedRateAddressRelsDisplayContext.getCountryId()
+		).put(
+			"regionId", commerceTaxFixedRateAddressRelsDisplayContext.getRegionId()
+		).build()
+	%>'
+	module="js/editCommerceTaxFixedRateAddressRel"
+/>

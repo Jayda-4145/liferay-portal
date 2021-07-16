@@ -81,7 +81,8 @@ definition {
 
 	@description = "This test checks that an inline image can be added to a blog."
 	@priority = "4"
-	@refactorneeded
+	@refactordone
+	@uitest
 	test CanAddEntryWithInlineImage {
 		BlogsNavigator.openToAddEntry(siteURLKey = "guest");
 
@@ -152,9 +153,47 @@ definition {
 			entryTitle = '''Blogs Entry Title `~!@#$%^&*(){}[],.<>/?|''');
 	}
 
+	@description = "This test covers LPS-102178. It checks that a blog entry can be saved as draft automatically when the custom URL is the same as the removed one."
+	@priority = "3"
+	test CanAutoSaveDuplicateCustomURL {
+		Blogs.addEntryWithCustomURL(
+			customURL = "my-custom-url",
+			entryContent = "Blog Entry Content",
+			entryTitle = "Blog Entry Title",
+			siteURLKey = "guest");
+
+		JSONBlog.moveEntryToTrash(
+			entryTitle = "Blog Entry Title",
+			friendlyURL = "my-custom-url",
+			groupName = "Guest");
+
+		BlogsNavigator.openToAddEntry(siteURLKey = "guest");
+
+		BlogsEntry.addEntryContent(
+			entryContent = "Blog Entry Content New",
+			entryTitle = "Blog Entry Title New");
+
+		Panel.expandPanel(panel = "Configuration");
+
+		BlogsEntry.addCustomURL(customURL = "my-custom-url");
+
+		BlogsEntry.autoSaveDraft();
+
+		BlogsNavigator.openBlogsAdmin(siteURLKey = "guest");
+
+		BlogsNavigator.gotoEntryCP(
+			entryStatus = "Draft",
+			entryTitle = "Blog Entry Title New");
+
+		BlogsEntry.viewEntryCP(
+			entryContent = "Blog Entry Content New",
+			entryTitle = "Blog Entry Title New");
+	}
+
 	@description = "This checks that a user can change the publish date for a scheduled entry to the present and publish it."
 	@priority = "4"
-	@refactorneeded
+	@refactordone
+	@uitest
 	test CanChangeAScheduledEntryToThePresentAndPublish {
 		property test.name.skip.portal.instance = "BlogsUsecase#CanChangeAScheduledEntryToThePresentAndPublish";
 
@@ -193,20 +232,8 @@ definition {
 
 	@description = "This test covers LPS-127212 and LPS-128781. This ensures that a blog title can be imported to a site when a duplicate title already exists."
 	@priority = "4"
-	@refactorneeded
+	@refactordone
 	test CanImportBlogWhenDuplicateTitleExists {
-		JSONGroup.addGroup(groupName = "Target Site Name");
-
-		JSONBlog.addEntry(
-			entryContent = "Blogs Entry Content",
-			entryTitle = "Blogs Entry Title",
-			groupName = "Target Site Name");
-
-		JSONBlog.addEntry(
-			entryContent = "Blogs Entry Content",
-			entryTitle = "Blogs Entry Title",
-			groupName = "Target Site Name");
-
 		JSONGroup.addGroup(groupName = "Source Site Name");
 
 		JSONBlog.addEntry(
@@ -216,17 +243,15 @@ definition {
 
 		BlogsNavigator.openBlogsAdmin(siteURLKey = "source-site-name");
 
-		LAR.exportPortlet(larFileName = "Blogs.portlet.lar");
+		LAR.importPortlet(
+			larFileName = "Blogs.portlet.lar",
+			uploadFrom = "dependencies");
 
-		BlogsNavigator.openBlogsAdmin(siteURLKey = "target-site-name");
-
-		LAR.importPortlet(larFileName = "Blogs.portlet.lar");
-
-		BlogsNavigator.openBlogsAdmin(siteURLKey = "target-site-name");
+		BlogsNavigator.openBlogsAdmin(siteURLKey = "source-site-name");
 
 		LexiconEntry.changeDisplayStyle(displayStyle = "table");
 
-		for (var i : list "1,2,3") {
+		for (var i : list "1,2") {
 			AssertTextEquals(
 				key_rowNumber = "${i}",
 				locator1 = "ContentRow#ENTRY_CONTENT_ROW_NUMBER_TD_2",
@@ -236,49 +261,83 @@ definition {
 
 	@description = "This checks that a blog entry with a comment can be imported with no data loss."
 	@priority = "4"
-	@refactorneeded
+	@refactordone
 	test CanImportEntryWithComment {
-		JSONBlog.addEntry(
-			entryContent = "Blogs Entry Content",
-			entryTitle = "Blogs Entry Title");
+		BlogsNavigator.openBlogsAdmin(siteURLKey = "guest");
+
+		LAR.importPortlet(
+			larFileName = "BlogWithComment.lar",
+			uploadFrom = "dependencies");
+
+		Navigator.gotoPage(pageName = "Blogs Page");
 
 		BlogsNavigator.openToBlogEntry(
-			entryTitle = "Blogs Entry Title",
-			layoutName = "Blogs Page",
-			siteURLKey = "guest");
-
-		Comments.addPG(entryComment = "Blogs Entry Comment");
-
-		Navigator.gotoPage(pageName = "Blogs Page");
-
-		LAR.exportPortlet(larFileName = "Blogs.portlet.lar");
-
-		Navigator.gotoPage(pageName = "Blogs Page");
-
-		BlogsEntry.tearDownCP();
-
-		Navigator.gotoPage(pageName = "Blogs Page");
-
-		LAR.importPortlet(larFileName = "Blogs.portlet.lar");
-
-		BlogsNavigator.openToBlogEntry(
-			entryTitle = "Blogs Entry Title",
+			entryTitle = "Blog Entry Title",
 			layoutName = "Blogs Page",
 			siteURLKey = "guest");
 
 		BlogsEntry.viewPG(
-			entryContent = "Blogs Entry Content",
-			entryTitle = "Blogs Entry Title");
-
-		BlogsNavigator.openToBlogEntry(
-			entryTitle = "Blogs Entry Title",
-			layoutName = "Blogs Page",
-			siteURLKey = "guest");
+			entryContent = "Blog Entry Content",
+			entryTitle = "Blog Entry Title");
 
 		Comments.viewPG(
 			commentCount = "1",
-			entryComment = "Blogs Entry Comment",
+			entryComment = "Blog Entry Comment",
+			importedComment = "true",
 			userFullName = "Test Test");
+	}
+
+	@description = "This checks that the image in the DM folder can be added to a blog entry as a cover image."
+	@priority = "3"
+	@refactordone
+	test CanViewBlogsEntryWithCoverImageFromDMFolders {
+		for (var n : list "1,2") {
+			JSONDocument.addFolder(
+				dmFolderDescription = "DM Folder ${n} Description",
+				dmFolderName = "DM Folder ${n} Name",
+				groupName = "Guest");
+
+			JSONDocument.addFolder(
+				dmFolderDescription = "DM SubFolder ${n} Description",
+				dmFolderName = "DM SubFolder ${n} Name",
+				groupName = "Guest",
+				parentFolderName = "DM Folder ${n} Name");
+
+			var fileEntryId = JSONDocument.addFileWithUploadedFile(
+				dmDocumentDescription = "DM Document Description",
+				dmDocumentTitle = "Document_${n}.jpg",
+				folderName = "DM SubFolder ${n} Name",
+				groupName = "Guest",
+				mimeType = "image/jpeg",
+				parentFolderName = "DM Folder ${n} Name",
+				sourceFileName = "Document_${n}.jpg");
+
+			JSONBlog.addEntryWithImage(
+				coverImageId = "${fileEntryId}",
+				entryContent = "Blogs Entry${n} Content",
+				entryTitle = "Blogs Entry${n} Title",
+				groupName = "Guest");
+		}
+
+		Navigator.gotoPage(pageName = "Blogs Page");
+
+		BlogsNavigator.openToBlogEntry(
+			entryTitle = "Blogs Entry1 Title",
+			layoutName = "Blogs Page",
+			siteURLKey = "guest");
+
+		AssertElementPresent(
+			key_uploadFileName = "Document_1",
+			locator1 = "BlogsEntry#ENTRY_COVER_IMAGE");
+
+		BlogsNavigator.openToBlogEntry(
+			entryTitle = "Blogs Entry2 Title",
+			layoutName = "Blogs Page",
+			siteURLKey = "guest");
+
+		AssertElementPresent(
+			key_uploadFileName = "Document_2",
+			locator1 = "BlogsEntry#ENTRY_COVER_IMAGE");
 	}
 
 	@description = "This checks that a custom blog abstracted can be viewed from the site page."
@@ -310,69 +369,10 @@ definition {
 			entryTitle = "Blogs Entry Title");
 	}
 
-	@description = "This test covers LPS-102033. It ensures that the comment only appears under the respective Blog Entry."
-	@priority = "3"
-	@refactorneeded
-	test CommentsAreViewableInAP {
-		JSONLayout.deletePublicLayout(
-			groupName = "Guest",
-			layoutName = "Blogs Page");
-
-		JSONLayout.addPublicLayout(
-			groupName = "Guest",
-			layoutName = "Asset Publisher Page");
-
-		JSONLayout.addWidgetToPublicLayout(
-			column = "1",
-			groupName = "Guest",
-			layoutName = "Asset Publisher Page",
-			widgetName = "Asset Publisher");
-
-		JSONBlog.addEntry(
-			entryContent = "Blogs Entry Content 1",
-			entryTitle = "Blogs Entry Title 1");
-
-		JSONBlog.addEntry(
-			entryContent = "Blogs Entry Content 2",
-			entryTitle = "Blogs Entry Title 2");
-
-		Navigator.gotoPage(pageName = "Asset Publisher Page");
-
-		AssetPublisherPortlet.configureDisplaySettings(displaySettings = "Comments");
-
-		Navigator.gotoPage(pageName = "Asset Publisher Page");
-
-		Comments.addPG(entryComment = "Blogs Entry Title 2 Comment");
-
-		Navigator.gotoPage(pageName = "Asset Publisher Page");
-
-		BlogsEntry.viewEntryViaAPPG(
-			assetTitle = "Blogs Entry Title 1",
-			entryContent = "Blogs Entry Content 1",
-			entryTitle = "Blogs Entry Title 1");
-
-		Comments.viewNoPG(
-			entryComment = "Blogs Entry Title 2 Comment",
-			userFullName = "Test Test");
-
-		Navigator.gotoPage(pageName = "Asset Publisher Page");
-
-		BlogsEntry.viewEntryViaAPPG(
-			assetTitle = "Blogs Entry Title 2",
-			entryContent = "Blogs Entry Content 2",
-			entryTitle = "Blogs Entry Title 2");
-
-		Comments.viewPG(
-			commentCount = "1",
-			entryComment = "Blogs Entry Title 2 Comment",
-			userFullName = "Test Test");
-	}
-
 	@priority = "4"
 	@refactorneeded
 	test DemoTrackbackURL {
 		property custom.properties = "blogs.trackback.enabled=true";
-		property dummy.socket.proxy.disabled = "true";
 		property test.name.skip.portal.instance = "BlogsUsecase#DemoTrackbackURL";
 
 		JSONBlog.addEntry(
@@ -755,102 +755,6 @@ definition {
 			entryTitle = "Blogs Entry Title");
 	}
 
-	@priority = "3"
-	@refactorneeded
-	test ViewBlogsEntryWithCoverImageFromDMFolders {
-		JSONLayout.addPublicLayout(
-			groupName = "Guest",
-			layoutName = "Documents and Media Page");
-
-		JSONLayout.addWidgetToPublicLayout(
-			column = "1",
-			groupName = "Guest",
-			layoutName = "Documents and Media Page",
-			widgetName = "Documents and Media");
-
-		Navigator.gotoPage(pageName = "Documents and Media Page");
-
-		DMDocument.enableActionsMenuOnPortlet();
-
-		Navigator.gotoPage(pageName = "Documents and Media Page");
-
-		DMFolder.addPG(
-			dmFolderDescription = "DM Folder 1 Description",
-			dmFolderName = "DM Folder 1 Name");
-
-		LexiconEntry.changeDisplayStyle(displayStyle = "list");
-
-		DMNavigator.gotoFolder(dmFolderName = "DM Folder 1 Name");
-
-		DMFolder.addPG(
-			dmFolderDescription = "DM SubFolder 1 Description",
-			dmFolderName = "DM SubFolder 1 Name");
-
-		DMNavigator.gotoFolder(dmFolderName = "DM SubFolder 1 Name");
-
-		DMDocument.addPG(
-			dmDocumentDescription = "DM Document Description",
-			dmDocumentFile = "Document_1.jpg",
-			dmDocumentTitle = "Document_1.jpg");
-
-		Navigator.gotoPage(pageName = "Documents and Media Page");
-
-		DMFolder.addPG(
-			dmFolderDescription = "DM Folder 2 Description",
-			dmFolderName = "DM Folder 2 Name");
-
-		DMNavigator.gotoFolder(dmFolderName = "DM Folder 2 Name");
-
-		DMFolder.addPG(
-			dmFolderDescription = "DM SubFolder 2 Description",
-			dmFolderName = "DM SubFolder 2 Name");
-
-		DMNavigator.gotoFolder(dmFolderName = "DM SubFolder 2 Name");
-
-		DMDocument.addPG(
-			dmDocumentDescription = "DM Document Description",
-			dmDocumentFile = "Document_2.jpg",
-			dmDocumentTitle = "Document_2.jpg");
-
-		Navigator.gotoPage(pageName = "Blogs Page");
-
-		Blogs.addEntryWithCoverImageFromDMFolders(
-			dmFolderName = "DM Folder 1 Name",
-			dmSubFolderName = "DM SubFolder 1 Name",
-			entryContent = "Blogs Entry1 Content",
-			entryTitle = "Blogs Entry1 Title",
-			imageFileName = "Document_1.jpg",
-			navTab = "Documents and Media");
-
-		Navigator.gotoPage(pageName = "Blogs Page");
-
-		Blogs.addEntryWithCoverImageFromDMFolders(
-			dmFolderName = "DM Folder 2 Name",
-			dmSubFolderName = "DM SubFolder 2 Name",
-			entryContent = "Blogs Entry2 Content",
-			entryTitle = "Blogs Entry2 Title",
-			imageFileName = "Document_2.jpg",
-			navTab = "Documents and Media");
-
-		BlogsNavigator.openToBlogEntry(
-			entryTitle = "Blogs Entry1 Title",
-			layoutName = "Blogs Page",
-			siteURLKey = "guest");
-
-		AssertElementPresent(
-			key_uploadFileName = "Document_1",
-			locator1 = "BlogsEntry#ENTRY_COVER_IMAGE");
-
-		BlogsNavigator.openToBlogEntry(
-			entryTitle = "Blogs Entry2 Title",
-			layoutName = "Blogs Page",
-			siteURLKey = "guest");
-
-		AssertElementPresent(
-			key_uploadFileName = "Document_2",
-			locator1 = "BlogsEntry#ENTRY_COVER_IMAGE");
-	}
-
 	@priority = "4"
 	@refactorneeded
 	test ViewBlogsEntryWithDefaultAbstract {
@@ -951,8 +855,6 @@ definition {
 			entryContent = "Blogs Entry Content",
 			entryTitle = "Blogs Entry Title");
 
-		Panel.expandPanel(panel = "Configuration");
-
 		BlogsEntry.scheduleBlogEntry();
 
 		PortletEntry.publish();
@@ -983,7 +885,7 @@ definition {
 
 		BlogsEntry.viewNoEntryViaBlogsAggregatorPG();
 
-		Pause(locator1 = "180000");
+		Pause(locator1 = "120000");
 
 		Navigator.gotoPage(pageName = "Blogs Aggregator Page");
 
@@ -1114,6 +1016,24 @@ definition {
 			orgName = "Organization3 Name",
 			parentOrgName = "Organization1 Name",
 			portletName = "Blogs Aggregator");
+	}
+
+	@description = "This test ensures that the blogs widgets can be accessible."
+	@priority = "4"
+	test WidgetsCanBeAccessible {
+		for (var widgetName : list "Blogs Aggregator,Microblogs,Microblogs Status Update,Recent Bloggers") {
+			JSONLayout.addWidgetToPublicLayout(
+				column = "1",
+				groupName = "Guest",
+				layoutName = "Blogs Page",
+				widgetName = "${widgetName}");
+		}
+
+		Navigator.openSitePage(
+			pageName = "Blogs Page",
+			siteName = "Guest");
+
+		AssertAccessible();
 	}
 
 }

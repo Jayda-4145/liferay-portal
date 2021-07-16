@@ -19,6 +19,7 @@ import ClayIcon from '@clayui/icon';
 import ClayLoadingIndicator from '@clayui/loading-indicator';
 import {useManualQuery} from 'graphql-hooks';
 import React, {useContext, useEffect, useState} from 'react';
+import {Helmet} from 'react-helmet';
 import {Redirect, withRouter} from 'react-router-dom';
 
 import {AppContext} from '../../AppContext.es';
@@ -30,7 +31,10 @@ import {
 	getSectionsQuery,
 } from '../../utils/client.es';
 import lang from '../../utils/lang.es';
-import {historyPushWithSlug} from '../../utils/utils.es';
+import {
+	getBasePathWithHistoryRouter,
+	historyPushWithSlug,
+} from '../../utils/utils.es';
 
 export default withRouter(({history}) => {
 	const context = useContext(AppContext);
@@ -51,8 +55,10 @@ export default withRouter(({history}) => {
 	const [getSectionBySectionTitle] = useManualQuery(
 		getSectionBySectionTitleQuery,
 		{
-			filter: `title eq '${context.rootTopicId}' or id eq '${context.rootTopicId}'`,
-			siteKey: context.siteKey,
+			variables: {
+				filter: `title eq '${context.rootTopicId}' or id eq '${context.rootTopicId}'`,
+				siteKey: context.siteKey,
+			},
 		}
 	);
 
@@ -60,9 +66,10 @@ export default withRouter(({history}) => {
 		const fn =
 			!context.rootTopicId || context.rootTopicId === '0'
 				? getSections()
-				: getSectionBySectionTitle().then(
-						({data}) => data.messageBoardSections.items[0]
-				  );
+				: getSectionBySectionTitle().then((result) => ({
+						...result,
+						data: result.data.messageBoardSections.items[0],
+				  }));
 
 		fn.then((result) => ({
 			...result,
@@ -87,7 +94,7 @@ export default withRouter(({history}) => {
 	]);
 
 	function descriptionTruncate(description) {
-		return description.length > 150
+		return description?.length > 150
 			? description.substring(0, 150) + '...'
 			: description;
 	}
@@ -237,6 +244,18 @@ export default withRouter(({history}) => {
 			{loading && <ClayLoadingIndicator />}
 
 			<Alert info={error} />
+
+			{context.historyRouterBasePath && (
+				<Helmet>
+					<title>Questions</title>
+					<link
+						href={getBasePathWithHistoryRouter(
+							context.historyRouterBasePath
+						)}
+						rel="canonical"
+					/>
+				</Helmet>
+			)}
 		</section>
 	);
 });

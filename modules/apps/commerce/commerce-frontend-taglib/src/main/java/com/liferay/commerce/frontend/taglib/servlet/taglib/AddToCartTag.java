@@ -52,8 +52,10 @@ public class AddToCartTag extends IncludeTag {
 	@Override
 	public int doStartTag() throws JspException {
 		try {
+			HttpServletRequest httpServletRequest = getRequest();
+
 			CommerceContext commerceContext =
-				(CommerceContext)request.getAttribute(
+				(CommerceContext)httpServletRequest.getAttribute(
 					CommerceWebKeys.COMMERCE_CONTEXT);
 
 			CommerceAccount commerceAccount =
@@ -104,8 +106,9 @@ public class AddToCartTag extends IncludeTag {
 				}
 			}
 
-			ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
-				WebKeys.THEME_DISPLAY);
+			ThemeDisplay themeDisplay =
+				(ThemeDisplay)httpServletRequest.getAttribute(
+					WebKeys.THEME_DISPLAY);
 
 			String pathThemeImages = themeDisplay.getPathThemeImages();
 
@@ -117,7 +120,7 @@ public class AddToCartTag extends IncludeTag {
 
 			if (sku != null) {
 				_stockQuantity = _commerceInventoryEngine.getStockQuantity(
-					PortalUtil.getCompanyId(request),
+					PortalUtil.getCompanyId(httpServletRequest),
 					commerceContext.getCommerceChannelGroupId(), sku);
 
 				_productSettingsModel = _productHelper.getProductSettingsModel(
@@ -125,8 +128,9 @@ public class AddToCartTag extends IncludeTag {
 
 				if (!_disabled) {
 					_disabled =
-						!_productSettingsModel.isBackOrders() &&
-						(_stockQuantity <= 0);
+						(!_productSettingsModel.isBackOrders() &&
+						 (_stockQuantity <= 0)) ||
+						!cpSku.isPublished();
 				}
 			}
 		}
@@ -223,13 +227,14 @@ public class AddToCartTag extends IncludeTag {
 	public void setPageContext(PageContext pageContext) {
 		super.setPageContext(pageContext);
 
+		setServletContext(ServletContextUtil.getServletContext());
+
 		_commerceInventoryEngine =
 			ServletContextUtil.getCommerceInventoryEngine();
 		_commerceOrderItemLocalService =
 			ServletContextUtil.getCommerceOrderItemLocalService();
 		_cpContentHelper = ServletContextUtil.getCPContentHelper();
 		_productHelper = ServletContextUtil.getProductHelper();
-		servletContext = ServletContextUtil.getServletContext();
 	}
 
 	public void setSpritemap(String spritemap) {

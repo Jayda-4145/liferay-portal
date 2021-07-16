@@ -96,10 +96,8 @@ export interface Config {
 	deleteFragmentEntryLinkCommentURL: string;
 	deleteItemURL: string;
 	deleteSegmentsExperienceURL: string;
-	discardDraftRedirectURL: string;
 	discardDraftURL: string;
 	draft: boolean;
-	dropdownWidgetTopperEnabled: boolean;
 	duplicateItemURL: string;
 	duplicateSegmentsExperienceURL: string;
 	editFragmentEntryLinkCommentURL: string;
@@ -119,6 +117,7 @@ export interface Config {
 	getAvailableListItemRenderersURL: string;
 	getAvailableTemplatesURL: string;
 	getCollectionFieldURL: string;
+	getCollectionFiltersURL: string;
 	getCollectionMappingFieldsURL: string;
 	getExperienceUsedPortletsURL: string;
 	getIframeContentCssURL: string;
@@ -127,6 +126,7 @@ export interface Config {
 	getInfoItemMappingFieldsURL: string;
 	getLayoutFriendlyURL: string;
 	getPageContentsURL: string;
+	getWidgetsURL: string;
 	imageSelectorURL: string;
 	infoItemPreviewSelectorURL: string;
 	infoItemSelectorURL: string;

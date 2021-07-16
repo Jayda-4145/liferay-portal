@@ -18,7 +18,9 @@ import {
 	LOAD_DATA,
 	SET_DATA,
 	SET_ERROR,
+	SET_ISSUES,
 	SET_LANGUAGE_ID,
+	SET_SELECTED_ISSUE,
 } from '../constants/actionTypes';
 
 const INITIAL_STATE = {
@@ -26,6 +28,7 @@ const INITIAL_STATE = {
 	error: null,
 	languageId: null,
 	loading: false,
+	selectedIssue: null,
 };
 
 const noop = () => {};
@@ -55,13 +58,24 @@ function reducer(state = INITIAL_STATE, action) {
 
 		case SET_DATA:
 			nextState = {
-				data: {
-					...state.data,
-					...action.data,
-				},
+				data: action.data,
 				error: action.data?.error,
 				languageId: state.languageId || action.data?.defaultLanguageId,
 				loading: action.loading || false,
+			};
+			break;
+
+		case SET_ISSUES:
+			nextState = {
+				...state,
+				data: {
+					...state.data,
+					layoutReportsIssues: {
+						...state.data.layoutReportsIssues,
+						[action.languageId]: action.layoutReportsIssues,
+					},
+				},
+				loading: false,
 			};
 			break;
 
@@ -69,6 +83,13 @@ function reducer(state = INITIAL_STATE, action) {
 			nextState = {
 				...state,
 				languageId: action.languageId,
+			};
+			break;
+
+		case SET_SELECTED_ISSUE:
+			nextState = {
+				...state,
+				selectedIssue: action.issue,
 			};
 			break;
 

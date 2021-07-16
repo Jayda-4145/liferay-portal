@@ -2,11 +2,13 @@
 <head>
 <title>WorkflowDefinition</title>
 </head>
+
 <body>
-<table cellpadding="1" cellspacing="1" border="1">
+<table border="1" cellpadding="1" cellspacing="1">
 <thead>
 <tr><td rowspan="1" colspan="3">WorkflowDefinition</td></tr>
 </thead>
+
 <tbody>
 <tr>
 	<td>PUBLICATION_STATUS</td>
@@ -57,7 +59,7 @@
 </tr>
 <tr>
 	<td>DEFINITION_TABLE_TITLE_UNPUBLISHED</td>
-	<td>//tr[count(preceding-sibling::tr[contains(@class,'table-divider')])=2 and contains(.,'${key_workflowDefinitionTitle}')]/td[1]</td>
+	<td>//tr[count(preceding-sibling::tr[contains(@class,'table-divider') and contains (.,'Not Published')]) and contains(.,'${key_workflowDefinitionTitle}')]/td[1]</td>
 	<td></td>
 </tr>
 <tr>

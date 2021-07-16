@@ -91,7 +91,15 @@ const getDateFormat = (locale) => {
 	};
 };
 
-const transformToDate = (
+const getInitialMonth = (value) => {
+	if (moment(value).isValid()) {
+		return moment(value).toDate();
+	}
+
+	return moment().toDate();
+};
+
+const getInitialValue = (
 	defaultLanguageId,
 	date,
 	locale,
@@ -102,29 +110,27 @@ const transformToDate = (
 			return moment(date, [
 				getLocaleDateFormat(locale),
 				'YYYY-MM-DD',
-			]).toDate();
+			]).format(getLocaleDateFormat(locale));
 		}
 
 		return moment(date, [
 			getLocaleDateFormat(defaultLanguageId),
 			'YYYY-MM-DD',
-		]).toDate();
+		]).format(getLocaleDateFormat(defaultLanguageId));
 	}
 
 	return date;
 };
 
-const getInitialMonth = (value) => {
-	if (moment(value).isValid()) {
-		return moment(value).toDate();
-	}
+const getValueForHidden = (value, locale) => {
+	const momentLocale = moment().locale(locale);
 
-	return moment().toDate();
-};
+	const momentLocaleFormatted = momentLocale.localeData().longDateFormat('L');
 
-const getValueForHidden = (value) => {
-	if (moment(value).isValid()) {
-		return moment(value).format('YYYY-MM-DD');
+	const newMoment = moment(value, momentLocaleFormatted, true);
+
+	if (newMoment.isValid()) {
+		return newMoment.format('YYYY-MM-DD');
 	}
 
 	return '';
@@ -135,6 +141,7 @@ const DatePicker = ({
 	disabled,
 	formatInEditingLocale,
 	locale,
+	localizedValue: localizedValueInitial = {},
 	name,
 	onChange,
 	spritemap,
@@ -145,11 +152,11 @@ const DatePicker = ({
 
 	const [expanded, setExpand] = useState(false);
 
-	const [localizedValue, setLocalizedValue] = useState({});
+	const [localizedValue, setLocalizedValue] = useState(localizedValueInitial);
 
 	const initialValueMemoized = useMemo(
 		() =>
-			transformToDate(
+			getInitialValue(
 				defaultLanguageId,
 				initialValue,
 				locale,
@@ -182,7 +189,11 @@ const DatePicker = ({
 			});
 
 			if (localizedValue[locale]) {
-				if (typeof localizedValue[locale] === 'string') {
+				if (
+					typeof localizedValue[locale] === 'string' &&
+					(localizedValue[locale].includes('/') ||
+						localizedValue[locale].includes('.'))
+				) {
 					inputRef.current.value = localizedValue[locale];
 				}
 				else {
@@ -227,7 +238,7 @@ const DatePicker = ({
 				id={name + '_fieldDetails'}
 				name={name}
 				type="hidden"
-				value={getValueForHidden(value)}
+				value={getValueForHidden(value, locale)}
 			/>
 			<ClayDatePicker
 				aria-labelledby={name + '_fieldDetails'}
@@ -266,12 +277,14 @@ const DatePicker = ({
 						return onChange('');
 					}
 
-					if (moment(value).isValid()) {
-						onChange(
-							moment(value, getLocaleDateFormat(locale)).format(
-								'L'
-							)
-						);
+					if (
+						moment(
+							value,
+							getLocaleDateFormat(locale),
+							true
+						).isValid()
+					) {
+						onChange(getValueForHidden(value, locale));
 					}
 				}}
 				ref={inputRef}
@@ -310,6 +323,7 @@ const Main = ({
 				localizedValue && localizedValue[locale] != undefined
 			}
 			locale={locale}
+			localizedValue={localizedValue}
 			name={name}
 			onChange={(value) => onChange({}, value)}
 			placeholder={placeholder}

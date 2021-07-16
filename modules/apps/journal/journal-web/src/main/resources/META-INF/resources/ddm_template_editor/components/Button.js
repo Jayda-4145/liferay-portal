@@ -13,32 +13,46 @@
  */
 
 import ClayButton from '@clayui/button';
-import {ClayTooltipProvider} from '@clayui/tooltip';
+import ClayIcon from '@clayui/icon';
+import ClayPopover from '@clayui/popover';
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, {useState} from 'react';
 
 const noop = () => {};
 
 export const Button = ({label, onClick = noop, tooltip}) => {
+	const [showPreview, setShowPreview] = useState(false);
+
 	return (
-		<ClayTooltipProvider
-			contentRenderer={({title}) => (
-				<div dangerouslySetInnerHTML={{__html: title}} />
-			)}
-			delay={0}
+		<ClayButton
+			borderless
+			className="ddm_template_editor__App-sidebar-button font-weight-semi-bold my-1 py-0 text-left text-truncate w-100"
+			displayType="unstyled"
+			key={label}
+			onClick={onClick}
+			small
 		>
-			<ClayButton
-				borderless
-				className="font-weight-normal text-left text-truncate w-100"
-				data-tooltip-align="right"
-				displayType="unstyled"
-				key={label}
-				onClick={onClick}
-				title={tooltip}
+			{label}
+			<ClayPopover
+				alignPosition="left"
+				disableScroll
+				header={label}
+				show={showPreview}
+				trigger={
+					<ClayIcon
+						className="preview-icon"
+						onBlur={() => setShowPreview(false)}
+						onFocus={() => setShowPreview(true)}
+						onMouseLeave={() => setShowPreview(false)}
+						onMouseOver={() => setShowPreview(true)}
+						symbol="info-circle-open"
+						tabIndex="0"
+					/>
+				}
 			>
-				{label}
-			</ClayButton>
-		</ClayTooltipProvider>
+				<div dangerouslySetInnerHTML={{__html: tooltip}} />
+			</ClayPopover>
+		</ClayButton>
 	);
 };
 

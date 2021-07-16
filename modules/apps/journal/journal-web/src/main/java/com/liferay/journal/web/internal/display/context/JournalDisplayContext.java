@@ -51,7 +51,6 @@ import com.liferay.journal.web.internal.security.permission.resource.JournalFold
 import com.liferay.journal.web.internal.servlet.taglib.util.JournalArticleActionDropdownItemsProvider;
 import com.liferay.journal.web.internal.servlet.taglib.util.JournalFolderActionDropdownItems;
 import com.liferay.journal.web.internal.translation.exporter.TranslationInfoItemFieldValuesExporterTrackerUtil;
-import com.liferay.journal.web.internal.util.ExportTranslationUtil;
 import com.liferay.journal.web.internal.util.JournalArticleTranslation;
 import com.liferay.journal.web.internal.util.JournalArticleTranslationRowChecker;
 import com.liferay.journal.web.internal.util.JournalPortletUtil;
@@ -103,6 +102,7 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.translation.constants.TranslationPortletKeys;
 import com.liferay.translation.exporter.TranslationInfoItemFieldValuesExporter;
 import com.liferay.trash.TrashHelper;
 
@@ -111,7 +111,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -550,15 +549,29 @@ public class JournalDisplayContext {
 
 	public Map<String, Object> getExportTranslationData() {
 		ResourceURL exportTranslationURL =
-			_liferayPortletResponse.createResourceURL();
+			_liferayPortletResponse.createResourceURL(
+				TranslationPortletKeys.TRANSLATION);
 
-		exportTranslationURL.setResourceID("/journal/export_translation");
+		exportTranslationURL.setParameter(
+			"groupId", String.valueOf(_themeDisplay.getScopeGroupId()));
+		exportTranslationURL.setParameter(
+			"classNameId",
+			String.valueOf(
+				PortalUtil.getClassNameId(JournalArticle.class.getName())));
+		exportTranslationURL.setResourceID("/translation/export_translation");
 
 		ResourceURL getExportTranslationAvailableLocalesURL =
-			_liferayPortletResponse.createResourceURL();
+			_liferayPortletResponse.createResourceURL(
+				TranslationPortletKeys.TRANSLATION);
 
+		getExportTranslationAvailableLocalesURL.setParameter(
+			"groupId", String.valueOf(_themeDisplay.getScopeGroupId()));
+		getExportTranslationAvailableLocalesURL.setParameter(
+			"classNameId",
+			String.valueOf(
+				PortalUtil.getClassNameId(JournalArticle.class.getName())));
 		getExportTranslationAvailableLocalesURL.setResourceID(
-			"/journal/get_export_translation_available_locales");
+			"/translation/get_export_translation_available_locales");
 
 		return HashMapBuilder.<String, Object>put(
 			"context",
@@ -575,10 +588,10 @@ public class JournalDisplayContext {
 								getTranslationInfoItemFieldValuesExporters();
 
 					Stream<TranslationInfoItemFieldValuesExporter>
-						translationInfoItemFieldValuesExporterStream =
+						translationInfoItemFieldValuesExportersStream =
 							translationInfoItemFieldValuesExporters.stream();
 
-					return translationInfoItemFieldValuesExporterStream.map(
+					return translationInfoItemFieldValuesExportersStream.map(
 						this::_getExportFileFormatJSONObject
 					).collect(
 						Collectors.toList()
@@ -586,7 +599,7 @@ public class JournalDisplayContext {
 				}
 			).put(
 				"availableTargetLocales",
-				ExportTranslationUtil.getLocalesJSONArray(
+				_getLocalesJSONArray(
 					_themeDisplay.getLocale(),
 					LanguageUtil.getAvailableLocales(
 						_themeDisplay.getSiteGroupId()))
@@ -1140,17 +1153,6 @@ public class JournalDisplayContext {
 		SearchContext searchContext = new SearchContext();
 
 		searchContext.setAndSearch(false);
-		searchContext.setAttribute("head", !showVersions);
-		searchContext.setAttribute("latest", !showVersions);
-
-		LinkedHashMap<String, Object> params =
-			LinkedHashMapBuilder.<String, Object>put(
-				"expandoAttributes", getKeywords()
-			).put(
-				"keywords", getKeywords()
-			).build();
-
-		searchContext.setAttribute("params", params);
 		searchContext.setAttributes(
 			HashMapBuilder.<String, Serializable>put(
 				Field.ARTICLE_ID, getKeywords()
@@ -1168,19 +1170,25 @@ public class JournalDisplayContext {
 			).put(
 				"ddmStructureKey", getDDMStructureKey()
 			).put(
-				"params", params
+				"head", !showVersions
+			).put(
+				"latest", !showVersions
+			).put(
+				"params",
+				LinkedHashMapBuilder.<String, Object>put(
+					"expandoAttributes", getKeywords()
+				).put(
+					"keywords", getKeywords()
+				).build()
+			).put(
+				"showNonindexable", !showVersions
 			).build());
-
 		searchContext.setCompanyId(_themeDisplay.getCompanyId());
 		searchContext.setEnd(end);
 		searchContext.setFolderIds(_getFolderIds());
 		searchContext.setGroupIds(new long[] {_themeDisplay.getScopeGroupId()});
 		searchContext.setIncludeInternalAssetCategories(true);
 		searchContext.setKeywords(getKeywords());
-
-		if (!showVersions) {
-			searchContext.setAttribute("showNonindexable", Boolean.TRUE);
-		}
 
 		QueryConfig queryConfig = searchContext.getQueryConfig();
 
@@ -1525,6 +1533,22 @@ public class JournalDisplayContext {
 
 			jsonArray.put(jsonObject);
 		}
+
+		return jsonArray;
+	}
+
+	private JSONArray _getLocalesJSONArray(
+		Locale currentLocale, Collection<Locale> locales) {
+
+		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
+
+		locales.forEach(
+			locale -> jsonArray.put(
+				JSONUtil.put(
+					"displayName", locale.getDisplayName(currentLocale)
+				).put(
+					"languageId", LocaleUtil.toLanguageId(locale)
+				)));
 
 		return jsonArray;
 	}

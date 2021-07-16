@@ -48,13 +48,14 @@ export const ItemSelectorField = ({field, onValueSelect, value}) => {
 				onItemSelect={(item) => {
 					onValueSelect(field.name, item);
 				}}
-				selectedItemTitle={
+				selectedItem={
 					isWithinCollection
-						? collectionItem.title ||
-						  Liferay.Language.get('collection-item')
-						: value.title
+						? collectionItem || {
+								title: Liferay.Language.get('collection-item'),
+						  }
+						: value
 				}
-				showAddButton={!isWithinCollection}
+				showEditControls={!isWithinCollection}
 				transformValueCallback={itemSelectorValueToInfoItem}
 			/>
 

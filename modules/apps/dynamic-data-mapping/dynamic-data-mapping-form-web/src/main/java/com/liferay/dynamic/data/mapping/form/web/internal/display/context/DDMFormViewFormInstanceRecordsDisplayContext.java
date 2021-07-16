@@ -17,6 +17,7 @@ package com.liferay.dynamic.data.mapping.form.web.internal.display.context;
 import com.liferay.dynamic.data.mapping.constants.DDMPortletKeys;
 import com.liferay.dynamic.data.mapping.form.field.type.DDMFormFieldTypeServicesTracker;
 import com.liferay.dynamic.data.mapping.form.field.type.DDMFormFieldValueRenderer;
+import com.liferay.dynamic.data.mapping.form.field.type.constants.DDMFormFieldTypeConstants;
 import com.liferay.dynamic.data.mapping.form.web.internal.search.DDMFormInstanceRecordSearch;
 import com.liferay.dynamic.data.mapping.form.web.internal.security.permission.resource.DDMFormInstancePermission;
 import com.liferay.dynamic.data.mapping.model.DDMForm;
@@ -103,8 +104,19 @@ public class DDMFormViewFormInstanceRecordsDisplayContext {
 		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
 
 		portletDisplay.setShowBackIcon(true);
-		portletDisplay.setURLBack(
-			ParamUtil.getString(_renderRequest, "redirect"));
+
+		String redirect = ParamUtil.getString(_renderRequest, "redirect");
+
+		if (Validator.isNull(redirect)) {
+			DDMFormAdminDisplayContext ddmFormAdminDisplayContext =
+				(DDMFormAdminDisplayContext)_renderRequest.getAttribute(
+					WebKeys.PORTLET_DISPLAY_CONTEXT);
+
+			redirect = String.valueOf(
+				ddmFormAdminDisplayContext.getPortletURL());
+		}
+
+		portletDisplay.setURLBack(redirect);
 
 		setDDMFormFields();
 	}
@@ -162,7 +174,8 @@ public class DDMFormViewFormInstanceRecordsDisplayContext {
 	}
 
 	public String getColumnValue(
-		DDMFormField ddmFormField, List<DDMFormFieldValue> ddmFormFieldValues) {
+		DDMFormField ddmFormField, String ddmFormFieldName,
+		List<DDMFormFieldValue> ddmFormFieldValues) {
 
 		if ((ddmFormField == null) || (ddmFormFieldValues == null)) {
 			return StringPool.BLANK;
@@ -181,6 +194,14 @@ public class DDMFormViewFormInstanceRecordsDisplayContext {
 				@Override
 				public String apply(DDMFormFieldValue ddmFormFieldValue) {
 					Value value = ddmFormFieldValue.getValue();
+
+					if (ddmFormFieldType.equals(
+							DDMFormFieldTypeConstants.SEARCH_LOCATION)) {
+
+						return ddmFormFieldValueRenderer.render(
+							ddmFormFieldName, ddmFormFieldValue,
+							value.getDefaultLocale());
+					}
 
 					return ddmFormFieldValueRenderer.render(
 						ddmFormFieldValue, value.getDefaultLocale());
@@ -441,6 +462,18 @@ public class DDMFormViewFormInstanceRecordsDisplayContext {
 		SearchContainer<?> searchContainer = getSearch();
 
 		return searchContainer.getTotal();
+	}
+
+	public List<String> getVisibleFields(DDMFormField ddmFormField) {
+		LocalizedValue visibleFields = (LocalizedValue)ddmFormField.getProperty(
+			"visibleFields");
+
+		return ListUtil.fromArray(
+			StringUtil.split(
+				StringUtil.removeChars(
+					visibleFields.getString(_renderRequest.getLocale()),
+					CharPool.CLOSE_BRACKET, CharPool.OPEN_BRACKET,
+					CharPool.QUOTE)));
 	}
 
 	public boolean isDisabledManagementBar() {

@@ -351,6 +351,7 @@ information.
 				<arg value="log" />
 				<arg value="--format=%s" />
 				<arg value="${latest.artifact.git.id}..HEAD" />
+				<arg value=":(exclude)test" />
 				<arg value="." />
 			</exec>
 
@@ -1177,8 +1178,8 @@ information.
 
 			<local name="junit.jvm.bin" />
 
-			<condition else="${junit.jvm.override}" property="junit.jvm.bin" value="${junit.jvm}">
-				<equals arg1="${junit.jvm.override}" arg2="" />
+			<condition else="${junit.jvm}" property="junit.jvm.bin" value="${junit.jvm.override}">
+				<isset property="junit.jvm.override" />
 			</condition>
 
 			<junit dir="${project.dir}" fork="on" forkmode="@{forkmode}" haltonfailure="${junit.halt.on.failure}" jvm="${junit.jvm.bin}" outputtoformatters="false" printsummary="on" showoutput="true">

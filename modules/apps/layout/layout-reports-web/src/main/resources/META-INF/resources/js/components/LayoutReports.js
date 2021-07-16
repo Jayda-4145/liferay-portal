@@ -12,27 +12,27 @@
  * details.
  */
 
-import ClayAlert from '@clayui/alert';
-import ClayButton from '@clayui/button';
-import ClayProgressBar from '@clayui/progress-bar';
 import {useIsMounted} from '@liferay/frontend-js-react-web';
 import {fetch} from 'frontend-js-web';
 import PropTypes from 'prop-types';
-import React, {useCallback, useContext, useEffect, useState} from 'react';
+import React, {useCallback, useContext, useEffect} from 'react';
 
 import {LOAD_DATA, SET_DATA, SET_ERROR} from '../constants/actionTypes';
 import {ConstantsContext} from '../context/ConstantsContext';
 import {StoreDispatchContext, StoreStateContext} from '../context/StoreContext';
-import getPageSpeedProgress from '../utils/getPageSpeedProgress';
 import loadIssues from '../utils/loadIssues';
 import BasicInformation from './BasicInformation';
-import EmptyLayoutReports from './EmptyLayoutReports';
-import LayoutReportsIssuesList from './LayoutReportsIssuesList';
+import IssueDetail from './IssueDetail';
+import IssuesList from './IssuesList';
+import NotConfigured from './NotConfigured';
+import ErrorAlert from './error-alert/ErrorAlert';
 
 export default function LayoutReports({eventTriggered}) {
 	const isMounted = useIsMounted();
 
-	const {data, error, languageId, loading} = useContext(StoreStateContext);
+	const {data, error, languageId, loading, selectedIssue} = useContext(
+		StoreStateContext
+	);
 
 	const {
 		isPanelStateOpen,
@@ -50,25 +50,6 @@ export default function LayoutReports({eventTriggered}) {
 		},
 		[dispatch, isMounted]
 	);
-
-	const [percentage, setPercentage] = useState(0);
-
-	useEffect(() => {
-		if (loading && !error) {
-			const initial = Date.now();
-			const interval = setInterval(() => {
-				const elapsedTimeInSeconds = (Date.now() - initial) / 1000;
-				const progress = getPageSpeedProgress(elapsedTimeInSeconds);
-
-				setPercentage(progress.toFixed(0));
-			}, 500);
-
-			return () => {
-				clearInterval(interval);
-				setPercentage(0);
-			};
-		}
-	}, [error, loading]);
 
 	const getData = useCallback(
 		(fetchURL) => {
@@ -92,7 +73,10 @@ export default function LayoutReports({eventTriggered}) {
 
 							loadIssues({
 								dispatch: safeDispatch,
+								languageId:
+									languageId || data.defaultLanguageId,
 								portletNamespace,
+								refreshCache: false,
 								url,
 							});
 						}
@@ -122,79 +106,38 @@ export default function LayoutReports({eventTriggered}) {
 		}
 	}, [eventTriggered, data, layoutReportsDataURL, getData]);
 
-	const onRelaunchButtonClick = () => {
-		const url = data.pageURLs.find(
-			(pageURL) =>
-				pageURL.languageId === (languageId || data.defaultLanguageId)
-		);
+	if (!data) {
+		return null;
+	}
 
-		loadIssues({
-			dispatch: safeDispatch,
-			portletNamespace,
-			url,
-		});
-	};
+	const hasError = (data.validConnection && error) || data.privateLayout;
+	const notConfigured = !loading && !data.validConnection;
+	const hasApiKey = !notConfigured;
 
 	return (
 		<>
-			{data?.validConnection && error && (
-				<ErrorAlert error={error} onRelaunch={onRelaunchButtonClick} />
-			)}
-
-			<div className="c-p-3">
-				{data && !error && (
+			{hasApiKey && (
+				<div className="pb-3 px-3">
 					<BasicInformation
 						defaultLanguageId={data.defaultLanguageId}
 						pageURLs={data.pageURLs}
 						selectedLanguageId={languageId}
 					/>
-				)}
-
-				{loading ? (
-					<div className="c-my-4 text-secondary">
-						{Liferay.Language.get(
-							'connecting-with-google-pagespeed'
-						)}
-						<ClayProgressBar value={percentage} />
-					</div>
-				) : (
-					data &&
-					!error &&
-					(data.validConnection && data?.layoutReportsIssues ? (
-						<LayoutReportsIssuesList />
-					) : (
-						<EmptyLayoutReports />
-					))
-				)}
-			</div>
+				</div>
+			)}
+			{hasError ? (
+				<ErrorAlert />
+			) : notConfigured ? (
+				<NotConfigured />
+			) : selectedIssue ? (
+				<IssueDetail />
+			) : (
+				<IssuesList />
+			)}
 		</>
 	);
 }
 
 LayoutReports.propTypes = {
 	eventTriggered: PropTypes.bool.isRequired,
-};
-
-const ErrorAlert = ({error, onRelaunch}) =>
-	error?.message ? (
-		<ClayAlert displayType="danger" variant="stripe">
-			{error.message}
-
-			<ClayAlert.Footer>
-				<ClayButton.Group>
-					<ClayButton alert onClick={onRelaunch}>
-						{error.buttonTitle}
-					</ClayButton>
-				</ClayButton.Group>
-			</ClayAlert.Footer>
-		</ClayAlert>
-	) : (
-		<ClayAlert displayType="danger" variant="stripe">
-			{error}
-		</ClayAlert>
-	);
-
-ErrorAlert.propTypes = {
-	error: PropTypes.object.isRequired,
-	onRelaunch: PropTypes.func.isRequired,
 };

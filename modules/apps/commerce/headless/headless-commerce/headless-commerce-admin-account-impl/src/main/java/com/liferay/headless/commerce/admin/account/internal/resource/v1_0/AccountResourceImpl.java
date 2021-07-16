@@ -264,14 +264,15 @@ public class AccountResourceImpl
 	@Override
 	public Account postAccount(Account account) throws Exception {
 		CommerceAccount commerceAccount =
-			_commerceAccountService.upsertCommerceAccount(
+			_commerceAccountService.addOrUpdateCommerceAccount(
 				account.getName(),
 				CommerceAccountConstants.DEFAULT_PARENT_ACCOUNT_ID, true, null,
 				_getEmailAddress(account, null), account.getTaxId(),
 				GetterUtil.get(
 					account.getType(),
 					CommerceAccountConstants.ACCOUNT_TYPE_PERSONAL),
-				true, account.getExternalReferenceCode(),
+				GetterUtil.getBoolean(account.getActive(), true),
+				account.getExternalReferenceCode(),
 				_serviceContextHelper.getServiceContext());
 
 		if (_isValidId(account.getDefaultBillingAccountAddressId())) {
@@ -481,7 +482,8 @@ public class AccountResourceImpl
 			commerceAccount.getCommerceAccountId(), account.getName(), true,
 			null, _getEmailAddress(account, commerceAccount),
 			GetterUtil.get(account.getTaxId(), commerceAccount.getTaxId()),
-			commerceAccount.isActive(),
+			GetterUtil.getBoolean(
+				account.getActive(), commerceAccount.isActive()),
 			GetterUtil.getLong(
 				account.getDefaultBillingAccountAddressId(),
 				commerceAccount.getDefaultBillingAddressId()),

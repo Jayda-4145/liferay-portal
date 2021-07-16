@@ -13,11 +13,10 @@
  */
 
 import ClayButton from '@clayui/button';
-import ClayDropDown from '@clayui/drop-down';
+import {ClayDropDownWithItems} from '@clayui/drop-down';
 import ClayIcon from '@clayui/icon';
 import ClayLayout from '@clayui/layout';
 import classNames from 'classnames';
-import {openModal} from 'frontend-js-web';
 import PropTypes from 'prop-types';
 import React, {useEffect, useMemo, useState} from 'react';
 
@@ -34,19 +33,21 @@ import {
 	useEditableProcessorUniqueId,
 	useSetEditableProcessorUniqueId,
 } from '../../../../../app/contexts/EditableProcessorContext';
-import {useSelector} from '../../../../../app/contexts/StoreContext';
+import {
+	useSelector,
+	useSelectorCallback,
+} from '../../../../../app/contexts/StoreContext';
+import {selectPageContentDropdownItems} from '../../../../../app/selectors/selectPageContentDropdownItems';
+import ImageEditorModal from './ImageEditorModal';
 
 export default function PageContent({
-	actions,
 	classNameId,
 	classPK,
 	editableId,
 	icon,
 	subtype,
 	title,
-	type,
 }) {
-	const [active, setActive] = useState(false);
 	const editableProcessorUniqueId = useEditableProcessorUniqueId();
 	const hoverItem = useHoverItem();
 	const hoveredItemId = useHoveredItemId();
@@ -58,6 +59,7 @@ export default function PageContent({
 	] = useState(null);
 	const selectItem = useSelectItem();
 	const setEditableProcessorUniqueId = useSetEditableProcessorUniqueId();
+	const [imageEditorParams, setImageEditorParams] = useState(null);
 	const toControlsId = useToControlsId();
 
 	const isBeingEdited = useMemo(
@@ -65,15 +67,31 @@ export default function PageContent({
 		[toControlsId, editableId, editableProcessorUniqueId]
 	);
 
-	let editURL = null;
-	let permissionsURL = null;
-	let viewUsagesURL = null;
+	const dropdownItems = useSelectorCallback(
+		(state) => {
+			const pageContentDropdownItems = selectPageContentDropdownItems(
+				classPK
+			)(state);
 
-	if (actions) {
-		editURL = actions.editURL;
-		permissionsURL = actions.permissionsURL;
-		viewUsagesURL = actions.viewUsagesURL;
-	}
+			return pageContentDropdownItems?.map((item) => {
+				if (item.label === Liferay.Language.get('edit-image')) {
+					return {
+						...item,
+						onClick: () => {
+							setImageEditorParams({
+								editImageURL: item.editImageURL,
+								fileEntryId: item.fileEntryId,
+								previewURL: item.previewURL,
+							});
+						},
+					};
+				}
+
+				return item;
+			});
+		},
+		[classPK]
+	);
 
 	useEffect(() => {
 		if (editableProcessorUniqueId || !nextEditbleProcessorUniqueId) {
@@ -189,13 +207,12 @@ export default function PageContent({
 					)}
 				</ClayLayout.ContentCol>
 
-				{editURL || permissionsURL || viewUsagesURL || type ? (
-					<ClayDropDown
-						active={active}
-						onActiveChange={setActive}
+				{dropdownItems?.length ? (
+					<ClayDropDownWithItems
+						items={dropdownItems}
 						trigger={
 							<ClayButton
-								className="btn-sm mr-2 text-secondary"
+								className="btn-monospaced btn-sm text-secondary"
 								displayType="unstyled"
 							>
 								<span className="sr-only">
@@ -204,47 +221,7 @@ export default function PageContent({
 								<ClayIcon symbol="ellipsis-v" />
 							</ClayButton>
 						}
-					>
-						<ClayDropDown.ItemList>
-							{editURL && (
-								<ClayDropDown.Item href={editURL} key="editURL">
-									{Liferay.Language.get('edit')}
-								</ClayDropDown.Item>
-							)}
-
-							{permissionsURL && (
-								<ClayDropDown.Item
-									key="permissionsURL"
-									onClick={() => {
-										openModal({
-											title: Liferay.Language.get(
-												'permissions'
-											),
-											url: permissionsURL,
-										});
-									}}
-								>
-									{Liferay.Language.get('permissions')}
-								</ClayDropDown.Item>
-							)}
-
-							{viewUsagesURL && (
-								<ClayDropDown.Item
-									key="viewUsagesURL"
-									onClick={() => {
-										openModal({
-											title: Liferay.Language.get(
-												'view-usages'
-											),
-											url: viewUsagesURL,
-										});
-									}}
-								>
-									{Liferay.Language.get('view-usages')}
-								</ClayDropDown.Item>
-							)}
-						</ClayDropDown.ItemList>
-					</ClayDropDown>
+					/>
 				) : (
 					<ClayButton
 						className={classNames('btn-sm mr-2 text-secondary', {
@@ -261,6 +238,16 @@ export default function PageContent({
 					</ClayButton>
 				)}
 			</div>
+
+			{imageEditorParams && (
+				<ImageEditorModal
+					editImageURL={imageEditorParams.editImageURL}
+					fileEntryId={imageEditorParams.fileEntryId}
+					fragmentEntryLinks={fragmentEntryLinks}
+					onCloseModal={() => setImageEditorParams(null)}
+					previewURL={imageEditorParams.previewURL}
+				/>
+			)}
 		</li>
 	);
 }

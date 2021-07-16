@@ -2,6 +2,7 @@
 definition {
 
 	property app.server.bundles.size = "1";
+	property custom.properties = "javascript.single.page.application.enabled=false";
 	property databases.size = "1";
 	property dummy.socket.proxy.disabled = "true";
 	property portal.release = "true";
@@ -204,7 +205,7 @@ definition {
 		User.firstLoginUI(
 			password = "test",
 			specificURL = "http://www.able.com:9080",
-			userEmailAddress = "test@liferay.com");
+			userEmailAddress = "test@www.able.com");
 
 		User.openUsersAdmin(baseURL = "http://www.able.com:9080");
 
@@ -219,8 +220,8 @@ definition {
 
 		User.firstLoginUI(
 			password = "test",
-			userEmailAddress = "test@www.baker.com",
-			virtualHostsURL = "http://www.baker.com:9080");
+			specificURL = "http://www.baker.com:9080",
+			userEmailAddress = "test@www.baker.com");
 
 		User.openUsersAdmin(baseURL = "http://www.baker.com:9080");
 
@@ -295,10 +296,10 @@ definition {
 		SAML.configureLiferaySAMLAsIdP(samlEntityID = "samlidp");
 
 		SAML.configureLiferaySAMLAsSP(
-			idpAttributes = "firstName",
 			samlEntityID = "samlsp",
 			spAttributes = "firstName",
-			spURL = "http://www.able.com:9080");
+			spURL = "http://www.able.com:9080",
+			userResolution = "dynamic");
 
 		User.logoutPG();
 
@@ -793,6 +794,7 @@ definition {
 		AssertConsoleTextPresent(value1 = "org.opensaml.messaging.handler.MessageHandlerException: Message context was not authenticated");
 	}
 
+	@description = "This is a use case for LPS-129373"
 	@priority = "4"
 	test ConfigureSAMLToImportUsersFromLDAP {
 		property apacheds.enabled = "true";
@@ -803,6 +805,8 @@ definition {
 		SAML.configureLiferaySAMLAsSP(
 			samlEntityID = "samlsp",
 			spURL = "http://www.able.com:9080");
+
+		Navigator.openURL();
 
 		ApplicationsMenu.gotoPortlet(
 			category = "Configuration",
@@ -824,9 +828,13 @@ definition {
 			panel = "Control Panel",
 			portlet = "Instance Settings");
 
-		PortalSettings.addLDAPServer(LDAPServerName = "ApacheDS Server");
+		PortalSettings.addLDAPServer(
+			baseURL = "http://www.able.com:9080",
+			LDAPServerName = "ApacheDS Server");
 
-		PortalSettings.editLDAPServer(LDAPServerName = "ApacheDS Server");
+		PortalSettings.editLDAPServer(
+			baseURL = "http://www.able.com:9080",
+			LDAPServerName = "ApacheDS Server");
 
 		PortalSettings.testLDAPConnection();
 
@@ -891,7 +899,7 @@ definition {
 		User.logoutPG(specificURL = "http://www.able.com:9080");
 
 		User.firstLoginUI(
-			password = "test",
+			password = "password",
 			specificURL = "http://www.able.com:9080",
 			userEmailAddress = "ldapuseremail@liferay.com");
 
@@ -1003,10 +1011,10 @@ definition {
 		SAML.configureLiferaySAMLAsIdP(samlEntityID = "samlidp");
 
 		SAML.configureLiferaySAMLAsSP(
-			idpAttributes = "firstName",
 			samlEntityID = "samlsp",
 			spAttributes = "firstName",
-			spURL = "http://www.able.com:9080");
+			spURL = "http://www.able.com:9080",
+			userResolution = "dynamic");
 
 		User.logoutPG();
 
@@ -1652,7 +1660,13 @@ definition {
 
 		User.viewLoggedOutPG();
 
-		SAML.configureLiferaySAMLAsIdP(samlEntityID = "samlidp");
+		User.logoutPG(specificURL = "http://localhost:8080");
+
+		User.viewLoggedOutPG();
+
+		SAML.configureLiferaySAMLAsIdP(
+			idpURL = "http://localhost:8080",
+			samlEntityID = "samlidp");
 
 		SAML.configureLiferaySAMLAsIdP(
 			idpURL = "http://www.able.com:8080",

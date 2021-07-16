@@ -34,7 +34,6 @@ definition {
 	@priority = "3"
 	test UseSubscriptions {
 		property portal.acceptance = "false";
-		property test.name.skip.portal.instance = "CPCommerceProductSubscriptions#UseSubscriptions";
 
 		// TODO Review
 

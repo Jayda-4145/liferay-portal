@@ -219,11 +219,11 @@ public class WorkflowTaskDisplayContext {
 		).buildString();
 	}
 
-	public String getCreateDate(WorkflowLog workflowLog) {
+	public String getCreateDateString(WorkflowLog workflowLog) {
 		return _dateFormatDateTime.format(workflowLog.getCreateDate());
 	}
 
-	public String getCreateDate(WorkflowTask workflowTask) {
+	public String getCreateDateString(WorkflowTask workflowTask) {
 		return _dateFormatDateTime.format(workflowTask.getCreateDate());
 	}
 
@@ -420,10 +420,10 @@ public class WorkflowTaskDisplayContext {
 			_getEditPortletURL(workflowTask)
 		).setRedirect(
 			themeDisplay.getURLCurrent()
+		).setPortletResource(
+			getPortletResource()
 		).setParameter(
-			"hideDefaultSuccessMessage", Boolean.TRUE.toString()
-		).setParameter(
-			"portletResource", getPortletResource()
+			"hideDefaultSuccessMessage", true
 		).setParameter(
 			"refererPlid", themeDisplay.getPlid()
 		).setParameter(
@@ -458,7 +458,7 @@ public class WorkflowTaskDisplayContext {
 				).setRedirect(
 					getCurrentURL()
 				).setParameter(
-					"hideControls", Boolean.TRUE.toString()
+					"hideControls", true
 				).setPortletMode(
 					PortletMode.VIEW
 				).setWindowState(

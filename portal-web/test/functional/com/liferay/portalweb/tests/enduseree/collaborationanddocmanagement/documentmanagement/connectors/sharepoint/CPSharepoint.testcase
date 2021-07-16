@@ -3,7 +3,6 @@ definition {
 
 	property cmis.repository.type = "sharepoint2010";
 	property custom.properties = "session.store.password=true${line.separator}company.security.auth.type=screenName";
-	property dummy.socket.proxy.disabled = "true";
 	property osgi.app.includes = "sharepoint-soap";
 	property portal.release = "false";
 	property portal.upstream = "true";
@@ -19,7 +18,7 @@ definition {
 			locator1 = "build-test-sharepoint.xml",
 			value1 = "clean-sharepoint-repository -Dssh.host=${sharepointVMHostName}");
 
-		User.firstLoginUI(
+		User.firstLoginByScreenNamePG(
 			authenticationMethod = "By Screen Name",
 			userScreenName = "test");
 
@@ -33,7 +32,7 @@ definition {
 
 		Navigator.gotoAccountSettings();
 
-		User.editPasswordViaMyAccount(
+		User.editPassword(
 			currentPassword = "test",
 			newPassword = "password");
 
@@ -83,13 +82,13 @@ definition {
 
 			UserBar.gotoDropdownItem(dropdownItem = "Account Settings");
 
-			User.editPasswordViaMyAccount(
+			User.editPassword(
 				currentPassword = "password",
 				newPassword = "test");
 
 			User.logoutPG();
 
-			User.firstLoginUI(
+			User.loginByScreenNamePG(
 				authenticationMethod = "By Screen Name",
 				password = "test",
 				userScreenName = "test");

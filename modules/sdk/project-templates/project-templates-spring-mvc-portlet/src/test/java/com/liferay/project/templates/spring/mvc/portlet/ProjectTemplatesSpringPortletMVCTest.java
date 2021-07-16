@@ -51,19 +51,19 @@ public class ProjectTemplatesSpringPortletMVCTest
 	public static Iterable<Object[]> data() {
 		return Arrays.asList(
 			new Object[][] {
-				{"springportletmvc", "embedded", "jsp", "7.0.6"},
-				{"springportletmvc", "embedded", "jsp", "7.1.3"},
-				{"springportletmvc", "embedded", "jsp", "7.2.1"},
-				{"springportletmvc", "embedded", "jsp", "7.3.6"},
-				{"springportletmvc", "embedded", "jsp", "7.4.0"},
-				{"portletmvc4spring", "embedded", "jsp", "7.1.3"},
-				{"portletmvc4spring", "embedded", "jsp", "7.2.1"},
-				{"portletmvc4spring", "embedded", "jsp", "7.3.6"},
-				{"portletmvc4spring", "embedded", "jsp", "7.4.0"},
-				{"portletmvc4spring", "embedded", "thymeleaf", "7.1.3"},
-				{"portletmvc4spring", "embedded", "thymeleaf", "7.2.1"},
-				{"portletmvc4spring", "embedded", "thymeleaf", "7.3.6"},
-				{"portletmvc4spring", "embedded", "thymeleaf", "7.4.0"}
+				{"springportletmvc", "embedded", "jsp", "7.0.6-2"},
+				{"springportletmvc", "embedded", "jsp", "7.1.3-1"},
+				{"springportletmvc", "embedded", "jsp", "7.2.1-1"},
+				{"springportletmvc", "embedded", "jsp", "7.3.7"},
+				{"springportletmvc", "embedded", "jsp", "7.4.1-1"},
+				{"portletmvc4spring", "embedded", "jsp", "7.1.3-1"},
+				{"portletmvc4spring", "embedded", "jsp", "7.2.1-1"},
+				{"portletmvc4spring", "embedded", "jsp", "7.3.7"},
+				{"portletmvc4spring", "embedded", "jsp", "7.4.1-1"},
+				{"portletmvc4spring", "embedded", "thymeleaf", "7.1.3-1"},
+				{"portletmvc4spring", "embedded", "thymeleaf", "7.2.1-1"},
+				{"portletmvc4spring", "embedded", "thymeleaf", "7.3.7"},
+				{"portletmvc4spring", "embedded", "thymeleaf", "7.4.1-1"}
 			});
 	}
 
@@ -116,51 +116,7 @@ public class ProjectTemplatesSpringPortletMVCTest
 			gradleProjectDir,
 			"src/main/java/com/test/controller/UserController.java");
 
-		if (_liferayVersion.equals("7.0.6")) {
-			testContains(
-				gradleProjectDir, "src/main/webapp/WEB-INF/liferay-display.xml",
-				"liferay-display_7_0_0.dtd");
-
-			testContains(
-				gradleProjectDir, "src/main/webapp/WEB-INF/liferay-portlet.xml",
-				"liferay-portlet-app_7_0_0.dtd");
-		}
-		else if (_liferayVersion.equals("7.1.3")) {
-			testContains(
-				gradleProjectDir, "src/main/webapp/WEB-INF/liferay-display.xml",
-				"liferay-display_7_1_0.dtd");
-
-			testContains(
-				gradleProjectDir, "src/main/webapp/WEB-INF/liferay-portlet.xml",
-				"liferay-portlet-app_7_1_0.dtd");
-		}
-		else if (_liferayVersion.equals("7.2.1")) {
-			testContains(
-				gradleProjectDir, "src/main/webapp/WEB-INF/liferay-display.xml",
-				"liferay-display_7_2_0.dtd");
-
-			testContains(
-				gradleProjectDir, "src/main/webapp/WEB-INF/liferay-portlet.xml",
-				"liferay-portlet-app_7_2_0.dtd");
-		}
-		else if (_liferayVersion.startsWith("7.3")) {
-			testContains(
-				gradleProjectDir, "src/main/webapp/WEB-INF/liferay-display.xml",
-				"liferay-display_7_3_0.dtd");
-
-			testContains(
-				gradleProjectDir, "src/main/webapp/WEB-INF/liferay-portlet.xml",
-				"liferay-portlet-app_7_3_0.dtd");
-		}
-		else if (_liferayVersion.startsWith("7.4")) {
-			testContains(
-				gradleProjectDir, "src/main/webapp/WEB-INF/liferay-display.xml",
-				"liferay-display_7_4_0.dtd");
-
-			testContains(
-				gradleProjectDir, "src/main/webapp/WEB-INF/liferay-portlet.xml",
-				"liferay-portlet-app_7_4_0.dtd");
-		}
+		testTemplateWarPortletDTD(gradleProjectDir, _liferayVersion);
 
 		if (_liferayVersion.startsWith("7.0")) {
 			testContains(

@@ -155,6 +155,7 @@ const Page = ({
 	portletNamespace,
 	readOnly,
 	strings,
+	viewMode,
 }) => {
 	const empty = isEmptyPage(defaultPage);
 	const page = normalizePage(defaultPage, editingLanguageId);
@@ -182,8 +183,9 @@ const Page = ({
 		});
 	}
 
-	const isDDMFormPortletNamespace =
-		DDM_FORM_PORTLET_NAMESPACE === portletNamespace;
+	const isDDMFormPortletNamespace = portletNamespace.includes(
+		DDM_FORM_PORTLET_NAMESPACE
+	);
 
 	return (
 		<VariantsProvider components={variants}>
@@ -223,6 +225,7 @@ const Page = ({
 						components={Components}
 						editable={editable}
 						rows={page.rows}
+						viewMode={viewMode}
 					/>
 				</Components.Page>
 			</Components.Container>

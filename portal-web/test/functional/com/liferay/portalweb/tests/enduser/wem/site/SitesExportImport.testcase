@@ -127,7 +127,7 @@ definition {
 	@description = "This is a test for LPS-98501. Export and import the whole site where a content page with a global fragment."
 	@priority = "4"
 	test ExportImportSiteWithGlobalFragmentInContentPage {
-		property testray.main.component.name = "Fragments,Site Administration";
+		property testray.main.component.name = "Content Pages";
 
 		task ("Add a fragment collection in Global site") {
 			JSONFragment.addFragmentCollection(
@@ -426,6 +426,115 @@ definition {
 				value1 = "Test Content Page Name");
 
 			AssertLocation.assertPartialLocation(value1 = "web/site-name/test-content-page-name");
+		}
+	}
+
+	@description = "This is a test for LPS-133032. Can export and import a site containing a style book."
+	@priority = "4"
+	test ExportImportSiteWithStyleBook {
+		task ("Add a style book") {
+			StyleBooksAdmin.openStyleBooksAdmin(siteURLKey = "test-site-name");
+
+			StyleBooksAdmin.addStyleBooks(styleBookName = "Test Style Book Name");
+		}
+
+		task ("Export the site") {
+			LAR.openExportAdmin(siteScopeName = "test-site-name");
+
+			LexiconEntry.gotoAdd();
+
+			LAR.exportWithAssertionOnSuccess();
+
+			LAR.downloadLar();
+		}
+
+		task ("Add a new site based on Blank Site") {
+			JSONGroup.addGroup(groupName = "Site Name");
+		}
+
+		task ("Import the lar into the new site") {
+			var larFileName = LAR.getLarFileName();
+
+			LAR.importSiteCP(
+				larFileName = "${larFileName}",
+				siteName = "Site Name");
+		}
+
+		task ("Assert no error and the style book persists") {
+			AssertConsoleTextNotPresent(value1 = "com.liferay.style.book.exception.DuplicateStyleBookEntryKeyException");
+
+			StyleBooksAdmin.openStyleBooksAdmin(siteURLKey = "site-name");
+
+			StyleBooksAdmin.viewStyleBooksPresent(styleBookName = "Test Style Book Name");
+		}
+	}
+
+	@description = "This is a test for LPS-128151. The user can import a site with Home page into the default site."
+	@priority = "4"
+	test ImportSiteWithHomePageToDefaultSite {
+		task ("Add a content page named Home") {
+			JSONLayout.addPublicLayout(
+				groupName = "Test Site Name",
+				layoutName = "Home",
+				type = "content");
+		}
+
+		task ("Add a Button fragment to page") {
+			ContentPagesNavigator.openEditContentPage(
+				pageName = "Test Page Name",
+				siteName = "Test Site Name");
+
+			PageEditor.addFragment(
+				collectionName = "Basic Components",
+				fragmentName = "Button");
+
+			PortletEntry.publish();
+		}
+
+		task ("View the friendly URL of content page at view mode") {
+			ContentPagesNavigator.openViewContentPage(
+				pageName = "Home",
+				siteName = "Test Site Name");
+
+			AssertLocation.assertPartialLocation(value1 = "/home");
+		}
+
+		task ("View the Button fragment shown on content page at view mode") {
+			AssertVisible(
+				id = "link",
+				key_position = "1",
+				key_text = "Go Somewhere",
+				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD_AT_VIEW_MODE");
+		}
+
+		task ("Export the new site") {
+			LAR.exportSiteCP(siteScopeName = "Test Site Name");
+
+			var larFileName = LAR.getLarFileName();
+
+			LAR.downloadLar();
+		}
+
+		task ("Import the new site into the default site") {
+			LAR.importSiteCP(
+				larFileName = "${larFileName}",
+				siteName = "Guest");
+		}
+
+		task ("View the friendly URL of content page at view mode") {
+			ContentPagesNavigator.openViewContentPage(
+				pageName = "Home",
+				siteName = "Guest");
+
+			AssertLocation.assertPartialLocation(value1 = "/home");
+		}
+
+		task ("View the Button fragment shown on content page at view mode") {
+			AssertVisible(
+				id = "link",
+				key_position = "1",
+				key_text = "Go Somewhere",
+				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_EDITABLE_FIELD_AT_VIEW_MODE");
 		}
 	}
 

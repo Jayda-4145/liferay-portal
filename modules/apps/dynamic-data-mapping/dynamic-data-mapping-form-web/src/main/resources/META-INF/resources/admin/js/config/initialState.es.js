@@ -42,6 +42,7 @@ export const BUILDER_INITIAL_STATE = {
 			),
 		},
 	},
+	objectFields: [],
 	paginationMode: 'multi-pages',
 	rules: [],
 };
@@ -66,6 +67,8 @@ const normalizePages = (pages) => {
 			// to refactor the Options field to better deal with states and location.
 
 			return {
+				...otherProps,
+				localizedValue: {},
 				settingsContext: {
 					...settingsContext,
 					pages: visitor.mapFields((field) => {
@@ -92,7 +95,7 @@ const normalizePages = (pages) => {
 						return field;
 					}),
 				},
-				...otherProps,
+				value: undefined,
 			};
 		},
 		true,
@@ -103,7 +106,6 @@ const normalizePages = (pages) => {
 export const initState = (
 	{
 		initialSuccessPageSettings,
-		localizedName,
 		pages: initialPages,
 		paginationMode: initialPaginationMode,
 		rules: initialRules,
@@ -147,8 +149,6 @@ export const initState = (
 	};
 
 	return {
-		availableLanguageIds: Object.keys(localizedName),
-		localizedName,
 		pages: [
 
 			// Adds new properties to pages for rendering and provides

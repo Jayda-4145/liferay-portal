@@ -70,6 +70,7 @@ const infoItem = {
 const emptyCollectionConfig = {
 	collection: {
 		classNameId: 'collectionClassNameId',
+		classPK: 'collectionClassPK',
 		itemSubtype: 'collectionItemSubtype',
 		itemType: 'collectionItemType',
 	},
@@ -163,7 +164,8 @@ function renderMappingSelector({
 				},
 			},
 		},
-		mappedInfoItems: [
+		mappingFields,
+		pageContents: [
 			{
 				classNameId: 'mappedItemClassNameId',
 				classPK: 'mappedItemClassPK',
@@ -173,8 +175,6 @@ function renderMappingSelector({
 				title: 'mappedItemTitle',
 			},
 		],
-		mappingFields,
-		pageContents: [],
 		segmentsExperienceId: 0,
 	};
 
@@ -206,7 +206,7 @@ describe('MappingSelector', () => {
 			renderMappingSelector({});
 		});
 
-		expect(getByText(document.body, 'content')).toBeInTheDocument();
+		expect(getByText(document.body, 'item')).toBeInTheDocument();
 		expect(getByText(document.body, 'field')).toBeInTheDocument();
 
 		expect(queryByText(document.body, 'source')).not.toBeInTheDocument();
@@ -241,7 +241,7 @@ describe('MappingSelector', () => {
 		expect(getByText('field')).toBeInTheDocument();
 		expect(getByText('source')).toBeInTheDocument();
 
-		expect(queryByText('content')).not.toBeInTheDocument();
+		expect(queryByText('item')).not.toBeInTheDocument();
 	});
 
 	it('calls onMappingSelect with correct params when mapping to content', async () => {
@@ -348,7 +348,7 @@ describe('MappingSelector', () => {
 		await act(async () => {
 			renderMappingSelector({
 				mappingFields: {
-					collectionClassNameId: [
+					'collectionClassNameId-collectionClassPK': [
 						{
 							fields: collectionFields,
 						},
@@ -357,18 +357,18 @@ describe('MappingSelector', () => {
 			});
 		});
 
+		useCollectionConfig.mockReset();
+
+		CollectionService.getCollectionMappingFields.mockReset();
+
 		expect(queryByText(document.body, 'source')).not.toBeInTheDocument();
-		expect(queryByText(document.body, 'content')).not.toBeInTheDocument();
+		expect(queryByText(document.body, 'item')).not.toBeInTheDocument();
 
 		expect(getByText(document.body, 'field')).toBeInTheDocument();
 
 		collectionFields.forEach((field) =>
 			expect(getByText(document.body, field.label)).toBeInTheDocument()
 		);
-
-		useCollectionConfig.mockReset();
-
-		CollectionService.getCollectionMappingFields.mockReset();
 	});
 
 	it('shows a warning and disables the selector if the fields array is empty', async () => {

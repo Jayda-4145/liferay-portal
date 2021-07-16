@@ -196,6 +196,49 @@ public class CommerceOrderItemLocalServiceImpl
 	}
 
 	@Override
+	public CommerceOrderItem addOrUpdateCommerceOrderItem(
+			long commerceOrderId, long cpInstanceId, int quantity,
+			int shippedQuantity, CommerceContext commerceContext,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		String cpInstanceOptionValueRelJSONString =
+			_getCPInstanceOptionValueRelsJSONString(cpInstanceId);
+
+		return commerceOrderItemLocalService.addOrUpdateCommerceOrderItem(
+			commerceOrderId, cpInstanceId, cpInstanceOptionValueRelJSONString,
+			quantity, 0, commerceContext, serviceContext);
+	}
+
+	@Override
+	public CommerceOrderItem addOrUpdateCommerceOrderItem(
+			long commerceOrderId, long cpInstanceId, String json, int quantity,
+			int shippedQuantity, CommerceContext commerceContext,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		List<CommerceOrderItem> commerceOrderItems = getCommerceOrderItems(
+			commerceOrderId, cpInstanceId, QueryUtil.ALL_POS,
+			QueryUtil.ALL_POS);
+
+		for (CommerceOrderItem commerceOrderItem : commerceOrderItems) {
+			if ((commerceOrderItem.getParentCommerceOrderItemId() == 0) &&
+				_jsonMatches(json, commerceOrderItem.getJson())) {
+
+				return commerceOrderItemLocalService.updateCommerceOrderItem(
+					commerceOrderItem.getCommerceOrderItemId(),
+					commerceOrderItem.getJson(),
+					commerceOrderItem.getQuantity() + quantity, commerceContext,
+					serviceContext);
+			}
+		}
+
+		return commerceOrderItemLocalService.addCommerceOrderItem(
+			commerceOrderId, cpInstanceId, json, quantity, 0, commerceContext,
+			serviceContext);
+	}
+
+	@Override
 	public int countSubscriptionCommerceOrderItems(long commerceOrderId) {
 		return commerceOrderItemPersistence.countByC_S(commerceOrderId, true);
 	}
@@ -841,49 +884,6 @@ public class CommerceOrderItemLocalServiceImpl
 			commerceOrderItem);
 	}
 
-	@Override
-	public CommerceOrderItem upsertCommerceOrderItem(
-			long commerceOrderId, long cpInstanceId, int quantity,
-			int shippedQuantity, CommerceContext commerceContext,
-			ServiceContext serviceContext)
-		throws PortalException {
-
-		String cpInstanceOptionValueRelJSONString =
-			_getCPInstanceOptionValueRelsJSONString(cpInstanceId);
-
-		return commerceOrderItemLocalService.upsertCommerceOrderItem(
-			commerceOrderId, cpInstanceId, cpInstanceOptionValueRelJSONString,
-			quantity, 0, commerceContext, serviceContext);
-	}
-
-	@Override
-	public CommerceOrderItem upsertCommerceOrderItem(
-			long commerceOrderId, long cpInstanceId, String json, int quantity,
-			int shippedQuantity, CommerceContext commerceContext,
-			ServiceContext serviceContext)
-		throws PortalException {
-
-		List<CommerceOrderItem> commerceOrderItems = getCommerceOrderItems(
-			commerceOrderId, cpInstanceId, QueryUtil.ALL_POS,
-			QueryUtil.ALL_POS);
-
-		for (CommerceOrderItem commerceOrderItem : commerceOrderItems) {
-			if ((commerceOrderItem.getParentCommerceOrderItemId() == 0) &&
-				_jsonMatches(json, commerceOrderItem.getJson())) {
-
-				return commerceOrderItemLocalService.updateCommerceOrderItem(
-					commerceOrderItem.getCommerceOrderItemId(),
-					commerceOrderItem.getJson(),
-					commerceOrderItem.getQuantity() + quantity, commerceContext,
-					serviceContext);
-			}
-		}
-
-		return commerceOrderItemLocalService.addCommerceOrderItem(
-			commerceOrderId, cpInstanceId, json, quantity, 0, commerceContext,
-			serviceContext);
-	}
-
 	protected SearchContext buildSearchContext(
 			long commerceOrderId, Long parentCommerceOrderItemId, int start,
 			int end, Sort sort)
@@ -937,14 +937,6 @@ public class CommerceOrderItemLocalServiceImpl
 
 			if (commerceOrderItem == null) {
 				commerceOrderItems = null;
-
-				Indexer<CommerceOrderItem> indexer =
-					IndexerRegistryUtil.getIndexer(CommerceOrderItem.class);
-
-				long companyId = GetterUtil.getLong(
-					document.get(Field.COMPANY_ID));
-
-				indexer.delete(companyId, document.getUID());
 			}
 			else if (commerceOrderItems != null) {
 				commerceOrderItems.add(commerceOrderItem);

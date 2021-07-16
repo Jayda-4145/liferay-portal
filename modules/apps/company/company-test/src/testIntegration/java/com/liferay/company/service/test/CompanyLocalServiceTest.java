@@ -32,6 +32,7 @@ import com.liferay.portal.kernel.exception.NoSuchAccountException;
 import com.liferay.portal.kernel.exception.NoSuchPasswordPolicyException;
 import com.liferay.portal.kernel.exception.NoSuchVirtualHostException;
 import com.liferay.portal.kernel.exception.RequiredCompanyException;
+import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Account;
@@ -100,6 +101,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -200,24 +202,24 @@ public class CompanyLocalServiceTest {
 
 		long userId = UserLocalServiceUtil.getDefaultUserId(companyId);
 
-		Organization companyOrganzation =
+		Organization companyOrganization =
 			OrganizationLocalServiceUtil.addOrganization(
 				userId, OrganizationConstants.DEFAULT_PARENT_ORGANIZATION_ID,
 				RandomTestUtil.randomString(), true);
 
-		Group companyOrganizationGroup = companyOrganzation.getGroup();
+		Group companyOrganizationGroup = companyOrganization.getGroup();
 
 		Group group = GroupTestUtil.addGroup(
 			companyId, userId, companyOrganizationGroup.getGroupId());
 
 		CompanyLocalServiceUtil.deleteCompany(company);
 
-		companyOrganzation = OrganizationLocalServiceUtil.fetchOrganization(
-			companyOrganzation.getOrganizationId());
+		companyOrganization = OrganizationLocalServiceUtil.fetchOrganization(
+			companyOrganization.getOrganizationId());
 
 		Assert.assertNull(
 			"The company organization should delete with the company",
-			companyOrganzation);
+			companyOrganization);
 
 		companyOrganizationGroup = GroupLocalServiceUtil.fetchGroup(
 			companyOrganizationGroup.getGroupId());
@@ -414,23 +416,23 @@ public class CompanyLocalServiceTest {
 
 		User companyAdminUser = UserTestUtil.addCompanyAdminUser(company);
 
-		Organization companyOrganzation =
+		Organization companyOrganization =
 			OrganizationLocalServiceUtil.addOrganization(
 				companyAdminUser.getUserId(),
 				OrganizationConstants.DEFAULT_PARENT_ORGANIZATION_ID,
 				RandomTestUtil.randomString(), true);
 
-		Group companyOrganizationGroup = companyOrganzation.getGroup();
+		Group companyOrganizationGroup = companyOrganization.getGroup();
 
 		GroupTestUtil.enableLocalStaging(
 			companyOrganizationGroup, companyAdminUser.getUserId());
 
 		CompanyLocalServiceUtil.deleteCompany(company);
 
-		companyOrganzation = OrganizationLocalServiceUtil.fetchOrganization(
-			companyOrganzation.getOrganizationId());
+		companyOrganization = OrganizationLocalServiceUtil.fetchOrganization(
+			companyOrganization.getOrganizationId());
 
-		Assert.assertNull(companyOrganzation);
+		Assert.assertNull(companyOrganization);
 
 		companyOrganizationGroup = GroupLocalServiceUtil.fetchGroup(
 			companyOrganizationGroup.getGroupId());
@@ -790,6 +792,37 @@ public class CompanyLocalServiceTest {
 			CompanyLocalServiceUtil.getCompanyByVirtualHost("0:0:0:0:0:0:0:1"));
 
 		CompanyLocalServiceUtil.deleteCompany(company);
+	}
+
+	@Test
+	public void testUpdateCompanyLocales() throws Exception {
+		long companyId = CompanyThreadLocal.getCompanyId();
+
+		try {
+			Company company = addCompany();
+
+			CompanyThreadLocal.setCompanyId(company.getCompanyId());
+
+			String languageId = "ca_ES";
+			TimeZone timeZone = company.getTimeZone();
+
+			CompanyLocalServiceUtil.updateDisplay(
+				company.getCompanyId(), languageId, timeZone.getID());
+
+			UnicodeProperties unicodeProperties = new UnicodeProperties();
+
+			unicodeProperties.put(PropsKeys.LOCALES, languageId);
+
+			CompanyLocalServiceUtil.updatePreferences(
+				company.getCompanyId(), unicodeProperties);
+
+			Assert.assertEquals(
+				Collections.singleton(LocaleUtil.fromLanguageId(languageId)),
+				LanguageUtil.getAvailableLocales());
+		}
+		finally {
+			CompanyThreadLocal.setCompanyId(companyId);
+		}
 	}
 
 	@Test

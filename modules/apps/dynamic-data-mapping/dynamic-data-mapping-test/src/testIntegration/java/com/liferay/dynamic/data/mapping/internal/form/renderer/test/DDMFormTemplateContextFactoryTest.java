@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -356,61 +357,49 @@ public class DDMFormTemplateContextFactoryTest {
 			(HashMap<String, Object>)ddmFormTemplateContext.get("validations");
 
 		Assert.assertEquals(
-			actualValidationsMap.toString(), 2, actualValidationsMap.size());
+			actualValidationsMap.toString(), 3, actualValidationsMap.size());
+		Assert.assertTrue(actualValidationsMap.containsKey("date"));
 		Assert.assertTrue(actualValidationsMap.containsKey("numeric"));
 		Assert.assertTrue(actualValidationsMap.containsKey("string"));
 
 		_assertValidations(
+			actualValidationsMap, "date",
+			HashMapBuilder.put(
+				"dateRange", "dateRange({name}, \"{parameter}\")"
+			).put(
+				"futureDates", "futureDates({name}, \"{parameter}\")"
+			).put(
+				"pastDates", "pastDates({name}, \"{parameter}\")"
+			).build());
+
+		_assertValidations(
 			actualValidationsMap, "numeric",
 			HashMapBuilder.put(
-				"eq",
-				_getValidation(
-					"/^(.+)==(\\d+\\.?\\d*)?$/", "{name} == {parameter}")
+				"eq", "{name} == {parameter}"
 			).put(
-				"gt",
-				_getValidation(
-					"/^(.+)<(\\d+\\.?\\d*)?$/", "{name} < {parameter}")
+				"gt", "{name} > {parameter}"
 			).put(
-				"gteq",
-				_getValidation(
-					"/^(.+)<=(\\d+\\.?\\d*)?$/", "{name} <= {parameter}")
+				"gteq", "{name} >= {parameter}"
 			).put(
-				"lt",
-				_getValidation(
-					"/^(.+)>(\\d+\\.?\\d*)?$/", "{name} > {parameter}")
+				"lt", "{name} < {parameter}"
 			).put(
-				"lteq",
-				_getValidation(
-					"/^(.+)>=(\\d+\\.?\\d*)?$/", "{name} >= {parameter}")
+				"lteq", "{name} <= {parameter}"
 			).put(
-				"neq",
-				_getValidation(
-					"/^(.+)!=(\\d+\\.?\\d*)?$/", "{name} != {parameter}")
+				"neq", "{name} != {parameter}"
 			).build());
 
 		_assertValidations(
 			actualValidationsMap, "string",
 			HashMapBuilder.put(
-				"contains",
-				_getValidation(
-					"/^contains\\((.+), \"(.*)\"\\)$/",
-					"contains({name}, \"{parameter}\")")
+				"contains", "contains({name}, \"{parameter}\")"
 			).put(
-				"email",
-				_getValidation(
-					"/^isEmailAddress\\((.+)\\)$/", "isEmailAddress({name})")
+				"email", "isEmailAddress({name})"
 			).put(
-				"notContains",
-				_getValidation(
-					"/^NOT\\(contains\\((.+), \"(.*)\"\\)\\)$/",
-					"NOT(contains({name}, \"{parameter}\"))")
+				"notContains", "NOT(contains({name}, \"{parameter}\"))"
 			).put(
-				"regularExpression",
-				_getValidation(
-					"/^match\\((.+), \"(.*)\"\\)$/",
-					"match({name}, \"{parameter}\")")
+				"regularExpression", "match({name}, \"{parameter}\")"
 			).put(
-				"url", _getValidation("/^isURL\\((.+)\\)$/", "isURL({name})")
+				"url", "isURL({name})"
 			).build());
 	}
 
@@ -443,7 +432,7 @@ public class DDMFormTemplateContextFactoryTest {
 
 	private void _assertValidations(
 		HashMap<String, Object> actualValidationsMap, String dataType,
-		HashMap<String, HashMap<String, String>> expectedValidationsMap) {
+		HashMap<String, String> expectedValidationsMap) {
 
 		Object[] actualValidations = (Object[])actualValidationsMap.get(
 			dataType);
@@ -452,58 +441,27 @@ public class DDMFormTemplateContextFactoryTest {
 			Arrays.toString(actualValidations), expectedValidationsMap.size(),
 			actualValidations.length);
 
-		HashMap<String, Object> reducedActualValidationsMap = new HashMap<>();
+		Stream.of(
+			actualValidations
+		).map(
+			HashMap.class::cast
+		).forEach(
+			actualValidation -> {
+				Assert.assertTrue(actualValidation.containsKey("label"));
+				Assert.assertTrue(actualValidation.containsKey("name"));
+				Assert.assertTrue(
+					actualValidation.containsKey("parameterMessage"));
+				Assert.assertTrue(actualValidation.containsKey("template"));
 
-		for (Object actualValidation : actualValidations) {
-			HashMap<String, Object> actualValidationPropertiesMap =
-				(HashMap<String, Object>)actualValidation;
+				Assert.assertEquals(
+					expectedValidationsMap.remove(actualValidation.get("name")),
+					actualValidation.get("template"));
+			}
+		);
 
-			Assert.assertTrue(
-				actualValidationPropertiesMap.containsKey("label"));
-			Assert.assertTrue(
-				actualValidationPropertiesMap.containsKey("name"));
-			Assert.assertTrue(
-				actualValidationPropertiesMap.containsKey("parameterMessage"));
-			Assert.assertTrue(
-				actualValidationPropertiesMap.containsKey("regex"));
-			Assert.assertTrue(
-				actualValidationPropertiesMap.containsKey("template"));
-
-			reducedActualValidationsMap.put(
-				(String)actualValidationPropertiesMap.get("name"),
-				actualValidationPropertiesMap);
-		}
-
-		for (Map.Entry<String, HashMap<String, String>> entry :
-				expectedValidationsMap.entrySet()) {
-
-			Assert.assertTrue(
-				reducedActualValidationsMap.containsKey(entry.getKey()));
-
-			HashMap<String, String> expectedValidationPropertiesMap =
-				entry.getValue();
-
-			HashMap<String, Object> actualValidationPropertiesMap =
-				(HashMap<String, Object>)reducedActualValidationsMap.get(
-					entry.getKey());
-
-			Assert.assertEquals(
-				expectedValidationPropertiesMap.get("regex"),
-				actualValidationPropertiesMap.get("regex"));
-			Assert.assertEquals(
-				expectedValidationPropertiesMap.get("template"),
-				actualValidationPropertiesMap.get("template"));
-		}
-	}
-
-	private HashMap<String, String> _getValidation(
-		String regex, String template) {
-
-		return HashMapBuilder.put(
-			"regex", regex
-		).put(
-			"template", template
-		).build();
+		Assert.assertEquals(
+			expectedValidationsMap.toString(), 0,
+			expectedValidationsMap.size());
 	}
 
 	@Inject

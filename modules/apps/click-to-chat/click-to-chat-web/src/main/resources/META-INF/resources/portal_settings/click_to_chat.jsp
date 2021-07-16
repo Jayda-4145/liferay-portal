@@ -44,7 +44,7 @@ ClickToChatConfiguration clickToChatConfiguration = (ClickToChatConfiguration)re
 		</aui:select>
 
 		<label class="text-secondary">
-			<liferay-ui:message key="site-settings-strategy-description" />
+			<liferay-ui:message arguments="click-to-chat" key="site-settings-strategy-description" />
 		</label>
 	</div>
 </div>
@@ -78,7 +78,7 @@ ClickToChatConfiguration clickToChatConfiguration = (ClickToChatConfiguration)re
 
 			<div class="hide mb-2" id="<portlet:namespace />clickToChatChatProviderLearnMessage<%= clickToChatChatProviderId %>">
 				<liferay-learn:message
-					key='<%= "chat-provider-account-id-help-" + clickToChatChatProviderId %>'
+					key='<%= "chat-provider-account-id-" + clickToChatChatProviderId %>'
 					resource="click-to-chat-web"
 				/>
 			</div>

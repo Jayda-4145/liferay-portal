@@ -76,7 +76,6 @@ function getStateWithConfig(config = {}) {
 			},
 		},
 		languageId: 'en_US',
-		mappedInfoItems: [],
 		mappingFields: {},
 		pageContents: [],
 		segmentsExperienceId: 0,
@@ -119,7 +118,7 @@ describe('EditableLinkPanel', () => {
 		expect(getByLabelText('url')).toBeInTheDocument();
 		expect(getByText('open-in-a-new-tab')).toBeInTheDocument();
 
-		expect(queryByText('content')).not.toBeInTheDocument();
+		expect(queryByText('item')).not.toBeInTheDocument();
 	});
 
 	it('shows mapping panel when changing link source', async () => {
@@ -133,7 +132,7 @@ describe('EditableLinkPanel', () => {
 			});
 		});
 
-		expect(getByLabelText('content')).toBeInTheDocument();
+		expect(getByLabelText('item')).toBeInTheDocument();
 
 		expect(queryByLabelText('url')).not.toBeInTheDocument();
 	});
@@ -172,7 +171,7 @@ describe('EditableLinkPanel', () => {
 			});
 		});
 
-		expect(getByLabelText(document.body, 'content')).toBeInTheDocument();
+		expect(getByLabelText(document.body, 'item')).toBeInTheDocument();
 		expect(
 			getByLabelText(document.body, 'open-in-a-new-tab')
 		).toBeChecked();
@@ -190,7 +189,7 @@ describe('EditableLinkPanel', () => {
 			});
 		});
 
-		expect(getByLabelText(document.body, 'content')).toBeInTheDocument();
+		expect(getByLabelText(document.body, 'item')).toBeInTheDocument();
 		expect(
 			getByLabelText(document.body, 'open-in-a-new-tab')
 		).toBeChecked();
@@ -212,7 +211,7 @@ describe('EditableLinkPanel', () => {
 			});
 		});
 
-		expect(getByLabelText(document.body, 'content')).toBeInTheDocument();
+		expect(getByLabelText(document.body, 'item')).toBeInTheDocument();
 		expect(getByLabelText(document.body, 'url')).toBeInTheDocument();
 		expect(getByLabelText(document.body, 'url')).toHaveValue('value');
 		expect(

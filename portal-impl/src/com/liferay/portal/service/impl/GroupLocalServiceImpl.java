@@ -3846,6 +3846,18 @@ public class GroupLocalServiceImpl extends GroupLocalServiceBaseImpl {
 
 		typeSettingsUnicodeProperties.fastLoad(typeSettings);
 
+		if (GetterUtil.getBoolean(
+				typeSettingsUnicodeProperties.getProperty(
+					GroupConstants.TYPE_SETTINGS_KEY_INHERIT_LOCALES),
+				true)) {
+
+			typeSettingsUnicodeProperties.setProperty(
+				PropsKeys.LOCALES,
+				StringUtil.merge(
+					LocaleUtil.toLanguageIds(
+						LanguageUtil.getAvailableLocales(groupId))));
+		}
+
 		String newLanguageIds = typeSettingsUnicodeProperties.getProperty(
 			PropsKeys.LOCALES);
 
@@ -3859,7 +3871,7 @@ public class GroupLocalServiceImpl extends GroupLocalServiceBaseImpl {
 					"languageId",
 					LocaleUtil.toLanguageId(LocaleUtil.getDefault()));
 
-			validateLanguageIds(defaultLanguageId, newLanguageIds);
+			validateLanguageIds(groupId, defaultLanguageId, newLanguageIds);
 
 			if (!Objects.equals(
 					group.getDefaultLanguageId(), defaultLanguageId)) {
@@ -3890,7 +3902,7 @@ public class GroupLocalServiceImpl extends GroupLocalServiceBaseImpl {
 			}
 		}
 
-		group.setTypeSettings(typeSettings);
+		group.setTypeSettingsProperties(typeSettingsUnicodeProperties);
 
 		return groupPersistence.update(group);
 	}
@@ -4301,7 +4313,13 @@ public class GroupLocalServiceImpl extends GroupLocalServiceBaseImpl {
 			groups.retainAll(rolePersistence.getGroups(roleId));
 		}
 
+		String actionId = (String)params.remove("actionId");
+
 		if (userId == null) {
+			if (actionId != null) {
+				return _filterGroups(actionId, groups);
+			}
+
 			return groups;
 		}
 
@@ -4345,30 +4363,8 @@ public class GroupLocalServiceImpl extends GroupLocalServiceBaseImpl {
 			}
 		}
 
-		String actionId = (String)params.remove("actionId");
-
 		if (actionId != null) {
-			PermissionChecker permissionChecker =
-				PermissionThreadLocal.getPermissionChecker();
-
-			for (Group group : groups) {
-				try {
-					if (permissionChecker.isGroupAdmin(group.getGroupId()) ||
-						GroupPermissionUtil.contains(
-							permissionChecker, group.getGroupId(), actionId)) {
-
-						joinedGroups.add(group);
-					}
-				}
-				catch (PortalException portalException) {
-					if (_log.isWarnEnabled()) {
-						_log.warn(
-							"Unable to check permission for group " +
-								group.getGroupId(),
-							portalException);
-					}
-				}
-			}
+			joinedGroups.addAll(_filterGroups(actionId, groups));
 		}
 
 		if (_log.isDebugEnabled() && !params.isEmpty()) {
@@ -4892,6 +4888,37 @@ public class GroupLocalServiceImpl extends GroupLocalServiceBaseImpl {
 			throw new GroupFriendlyURLException(
 				GroupFriendlyURLException.INVALID_CHARACTERS);
 		}
+
+		for (Locale locale : LanguageUtil.getAvailableLocales()) {
+			String languageId = StringUtil.toLowerCase(
+				LocaleUtil.toLanguageId(locale));
+
+			String i18nPathLanguageId =
+				StringPool.SLASH +
+					PortalUtil.getI18nPathLanguageId(locale, languageId);
+
+			String underlineI18nPathLanguageId = StringUtil.replace(
+				i18nPathLanguageId, CharPool.DASH, CharPool.UNDERLINE);
+
+			if (friendlyURL.startsWith(i18nPathLanguageId + StringPool.SLASH) ||
+				friendlyURL.startsWith(
+					underlineI18nPathLanguageId + StringPool.SLASH) ||
+				friendlyURL.startsWith(
+					StringPool.SLASH + languageId + StringPool.SLASH) ||
+				friendlyURL.equals(i18nPathLanguageId) ||
+				friendlyURL.equals(underlineI18nPathLanguageId) ||
+				friendlyURL.equals(StringPool.SLASH + languageId)) {
+
+				GroupFriendlyURLException groupFriendlyURLException =
+					new GroupFriendlyURLException(
+						GroupFriendlyURLException.KEYWORD_CONFLICT);
+
+				groupFriendlyURLException.setKeywordConflict(
+					i18nPathLanguageId);
+
+				throw groupFriendlyURLException;
+			}
+		}
 	}
 
 	protected void validateGroupKey(
@@ -4962,14 +4989,14 @@ public class GroupLocalServiceImpl extends GroupLocalServiceBaseImpl {
 	}
 
 	protected void validateLanguageIds(
-			String defaultLanguageId, String languageIds)
+			long groupId, String defaultLanguageId, String languageIds)
 		throws PortalException {
 
 		String[] languageIdsArray = StringUtil.split(languageIds);
 
 		for (String languageId : languageIdsArray) {
 			if (!LanguageUtil.isAvailableLocale(
-					LocaleUtil.fromLanguageId(languageId))) {
+					groupId, LocaleUtil.fromLanguageId(languageId))) {
 
 				LocaleException localeException = new LocaleException(
 					LocaleException.TYPE_DISPLAY_SETTINGS);
@@ -5201,6 +5228,36 @@ public class GroupLocalServiceImpl extends GroupLocalServiceBaseImpl {
 	}
 
 	protected File publicLARFile;
+
+	private Collection<Group> _filterGroups(
+		String actionId, Collection<Group> groups) {
+
+		Collection<Group> filteredGroups = new HashSet<>();
+
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
+		for (Group group : groups) {
+			try {
+				if (permissionChecker.isGroupAdmin(group.getGroupId()) ||
+					GroupPermissionUtil.contains(
+						permissionChecker, group.getGroupId(), actionId)) {
+
+					filteredGroups.add(group);
+				}
+			}
+			catch (PortalException portalException) {
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						"Unable to check permission for group " +
+							group.getGroupId(),
+						portalException);
+				}
+			}
+		}
+
+		return filteredGroups;
+	}
 
 	private Map<Locale, String> _normalizeNameMap(Map<Locale, String> nameMap) {
 		Map<Locale, String> normalizedNameMap = new HashMap<>();

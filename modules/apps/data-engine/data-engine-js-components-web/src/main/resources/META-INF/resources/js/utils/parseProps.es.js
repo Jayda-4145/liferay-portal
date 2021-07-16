@@ -66,6 +66,8 @@ export const parseProps = ({
 	showSubmitButton,
 	spritemap,
 	submitLabel,
+	submittable,
+	validateCSRFTokenURL,
 	view,
 	...otherProps
 }) => ({
@@ -104,6 +106,8 @@ export const parseProps = ({
 		sidebarPanels,
 		spritemap,
 		submitLabel,
+		submittable,
+		validateCSRFTokenURL,
 		view,
 	}),
 	state: validator({

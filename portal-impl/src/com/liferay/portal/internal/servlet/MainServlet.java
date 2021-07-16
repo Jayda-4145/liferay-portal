@@ -113,7 +113,6 @@ import java.io.InputStream;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -124,10 +123,8 @@ import javax.portlet.PortletConfig;
 import javax.portlet.PortletContext;
 
 import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRegistration;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -372,16 +369,13 @@ public class MainServlet extends HttpServlet {
 		}
 
 		if (_log.isDebugEnabled()) {
-			_log.debug("Initialize themes");
-		}
-
-		if (_log.isDebugEnabled()) {
 			_log.debug("Initialize web settings");
 		}
 
 		try {
 			String xml = StreamUtil.toString(
-				servletContext.getResourceAsStream("/WEB-INF/web.xml"));
+				servletContext.getResourceAsStream(
+					"/WEB-INF/shielded-container-web.xml"));
 
 			_checkWebSettings(xml);
 		}
@@ -550,10 +544,6 @@ public class MainServlet extends HttpServlet {
 		}
 
 		httpServletRequest.setAttribute(WebKeys.CTX, getServletContext());
-
-		if (_log.isDebugEnabled()) {
-			_log.debug("Handle non-serializable request");
-		}
 
 		if (_log.isDebugEnabled()) {
 			_log.debug("Encrypt request");
@@ -766,8 +756,6 @@ public class MainServlet extends HttpServlet {
 
 	private ModuleConfig _init() throws ServletException {
 		try {
-			_initServlet();
-
 			TilesUtil.loadDefinitions(getServletContext());
 
 			return _initModuleConfig();
@@ -995,25 +983,6 @@ public class MainServlet extends HttpServlet {
 		servletContext.setAttribute(WebKeys.PLUGIN_PORTLETS, portlets);
 
 		return portlets;
-	}
-
-	private void _initServlet() {
-		ServletConfig servletConfig = getServletConfig();
-
-		ServletContext servletContext = getServletContext();
-
-		ServletRegistration servletRegistration =
-			servletContext.getServletRegistration(
-				servletConfig.getServletName());
-
-		Collection<String> mappings = servletRegistration.getMappings();
-
-		Iterator<String> iterator = mappings.iterator();
-
-		if (iterator.hasNext()) {
-			servletContext.setAttribute(
-				WebKeys.SERVLET_MAPPING, iterator.next());
-		}
 	}
 
 	private long _loginUser(
