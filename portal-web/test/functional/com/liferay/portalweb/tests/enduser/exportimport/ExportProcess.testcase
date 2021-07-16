@@ -60,6 +60,8 @@ definition {
 
 	@priority = "3"
 	test ViewExportProcess {
+		property portal.acceptance = "jayda";
+		
 		LAR.exportSiteCP(
 			larFileName = "CustomExport",
 			siteScopeName = "Guest");

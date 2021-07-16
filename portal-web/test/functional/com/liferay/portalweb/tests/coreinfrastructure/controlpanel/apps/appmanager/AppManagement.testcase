@@ -47,6 +47,7 @@ definition {
 
 	@priority = "3"
 	test AppManagerFilterAndOrder {
+		property portal.acceptance = "jayda";
 		property test.name.skip.portal.instance = "AppManagement#AppManagerFilterAndOrder";
 
 		ApplicationsMenu.gotoPortlet(
