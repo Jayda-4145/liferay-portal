@@ -55,7 +55,7 @@ definition {
 
 	@description = "LRQA-70845 Verify that cannot bypass workflow by duplicating article"
 	@priority = "5"
-	test CannotBypassWorkflowByduplicatingArticle{
+	test CannotBypassWorkflowByduplicatingArticle {
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			portlet = "Web Content");
