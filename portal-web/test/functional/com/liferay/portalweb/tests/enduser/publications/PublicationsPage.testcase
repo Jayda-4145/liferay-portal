@@ -47,7 +47,7 @@ definition {
 		ContentPages.addPage(pageName = "Test Content Page Name");
 
 		PageEditor.clickPublish();
-		
+
 		Publications.selectPublication(publicationName = "Publication Name");
 
 		Navigator.openURL();
