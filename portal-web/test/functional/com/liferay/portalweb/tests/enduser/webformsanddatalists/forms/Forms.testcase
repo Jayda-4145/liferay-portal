@@ -2602,12 +2602,12 @@ definition {
 			fieldValue = "Switch 1");
 	}
 
-	@description = "LPS-84637 - Form title and description get not escape when unpublish it."
+	@description = "LPS-84637 - Form title and description get unescaped after unpublish it."
 	@priority = "5"
-	test TitleAndDescriptionGetNotEscapeWhenUnpublish {
+	test TitleAndDescriptionXSSUnescapedAfterUnpublish {
 		property portal.acceptance = "true";
 		property portal.upstream = "true";
-		property test.name.skip.portal.instance = "Forms#TitleAndDescriptionGetNotEscapeWhenUnpublish";
+		property test.name.skip.portal.instance = "Forms#TitleAndDescriptionXSSUnescapedAfterUnpublish";
 
 		FormsAdmin.addForm();
 
