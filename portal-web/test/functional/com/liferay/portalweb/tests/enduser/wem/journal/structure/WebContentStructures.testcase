@@ -330,11 +330,7 @@ definition {
 				locator1 = "Button#CANCEL",
 				value1 = "Cancel");
 
-			var portalURL = PropsUtil.get("portal.url");
-			var currentURL = Navigator.getCurrentURL();
-			var p_p_authParam = StringUtil.extractLast("${currentURL}", "=");
-
-			AssertLocation(value1 = "${portalURL}/group/test-site-name/~/control_panel/manage?p_p_id=com_liferay_layout_admin_web_portlet_GroupPagesPortlet&p_p_lifecycle=0&p_p_state=maximized&p_p_auth=${p_p_authParam}");
+			AssertLocation.assertPartialLocation(value1 = "com_liferay_layout_admin_web_portlet_GroupPagesPortlet");
 		}
 
 		task ("Add a structure with 9 Link to Page fields") {
