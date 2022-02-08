@@ -44,7 +44,7 @@ definition {
 
 		BlogsEntry.addContentWithInlineImage(
 			entryContent = "Blogs Entry Content",
-			entryInlineImageUrl = "www.liferay.com",
+			entryInlineImageURL = "www.liferay.com",
 			navTab = "Upload Image",
 			uploadFileName = "Document_1.jpg");
 

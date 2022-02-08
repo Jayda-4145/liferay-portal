@@ -31,7 +31,7 @@ definition {
 				uploadFileName = "${uploadFileName}");
 		}
 
-		if (isSet(entryInlineImageUrl)) {
+		if (isSet(entryInlineImageURL)) {
 			var key_uploadFileName = StringUtil.replace("${uploadFileName}", ".jpg", "");
 
 			Click(
@@ -42,7 +42,7 @@ definition {
 
 			Type(
 				locator1 = "AlloyEditor#TEXT_FORMATTING_LINK_INPUT",
-				value1 = "${entryInlineImageUrl}");
+				value1 = "${entryInlineImageURL}");
 
 			Click(locator1 = "AlloyEditor#TEXT_FORMATTING_LINK_INPUT_CONFIRM");
 
