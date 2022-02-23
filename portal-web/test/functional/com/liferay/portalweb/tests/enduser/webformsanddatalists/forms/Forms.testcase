@@ -1659,6 +1659,76 @@ definition {
 		Form.viewPageEmptyField(pageIndex = "0");
 	}
 
+	@description = "LPS-111551 - As a Forms admin, I want to reorder my form pages"
+	@priority = "4"
+	test ReorderPagesAndVerifyFields {
+		FormsAdmin.addForm();
+
+		Form.editName(formName = "Form 1");
+
+		Form.editPageTitle(
+			formPageName = "Page A",
+			formTitleNumber = "1");
+
+		Form.addTextField(fieldPositionNumber = "0");
+
+		var fieldTextField = FormFields.getFieldName();
+
+		Form.editFieldLabelMetal(fieldValue = "Text Field 1");
+
+		Form.closeSidebar();
+
+		Form.addPage(formAddNewPageNumber = "1");
+
+		Form.editPageTitle(
+			formPageName = "Page B",
+			formTitleNumber = "2");
+
+		Form.addTextField(
+			fieldPositionNumber = "0",
+			formPageNumber = "1");
+
+		Form.editFieldLabelMetal(fieldValue = "Text Field 2");
+
+		Form.closeSidebar();
+
+		Form.movePageDown(formPageName = "Page A");
+
+		Form.viewButtonPageDisabled(
+			formPageName = "Page A",
+			pageMove = "Down");
+
+		Form.viewButtonPageDownEnabled(formPageName = "Page B");
+
+		Form.viewButtonPageUpEnabled(formPageName = "Page A");
+
+		AssertElementPresent(
+			key_fieldName = "Text Field 2",
+			key_fieldPositionNumber = "0",
+			key_formPageNumber = "0",
+			locator1 = "Form#FIELD_BODY_IN_SPECIFIC_POSITION");
+
+		AssertElementPresent(
+			key_fieldName = "Text Field 1",
+			key_fieldPositionNumber = "0",
+			key_formPageNumber = "1",
+			locator1 = "Form#FIELD_BODY_IN_SPECIFIC_POSITION");
+
+		Form.movePageUp(formPageName = "Page A");
+
+		AssertElementPresent(
+			key_fieldName="Text Field 1",
+			key_fieldPositionNumber = "0",
+			key_formPageNumber="0",
+			locator1 = "Form#FIELD_BODY_IN_SPECIFIC_POSITION");
+
+		AssertElementPresent(
+			key_fieldName = "Text Field 2",
+			key_fieldPositionNumber = "0",
+			key_formPageNumber = "1",
+			locator1 = "Form#FIELD_BODY_IN_SPECIFIC_POSITION");
+	}
+
 	@description = "This is a use case for LPS-59336."
 	@priority = "4"
 	test SearchFormRecordMultipleEntries {
