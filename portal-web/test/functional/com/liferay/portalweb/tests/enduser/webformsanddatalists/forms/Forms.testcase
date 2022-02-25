@@ -1715,7 +1715,7 @@ definition {
 		Form.movePageUp(formPageName = "Page A");
 
 		Form.viewReorderPageAndVerifyField(
-			fieldName="Text Field 1",
+			fieldName ="Text Field 1",
 			fieldPositionNumber = "0",
 			formPageNumber="0");
 
