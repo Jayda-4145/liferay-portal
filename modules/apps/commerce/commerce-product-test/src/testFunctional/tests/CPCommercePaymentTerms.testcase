@@ -48,6 +48,16 @@ definition {
 	@description = "[Please Update]"
 	@ignore = "Test Stub"
 	@priority = "4"
+	test AssertPaymentTermNameIsUnique {
+		property portal.acceptance = "false";
+
+		// TODO COMMERCE-8283 PaymentTermNameIsUnique pending implementation
+
+	}
+
+	@description = "[Please Update]"
+	@ignore = "Test Stub"
+	@priority = "4"
 	test AssertPaymentTermPriority {
 		property portal.acceptance = "false";
 
@@ -55,14 +65,34 @@ definition {
 
 	}
 
-	@description = "[Please Update]"
-	@ignore = "Test Stub"
+	@description = "This is a test for COMMERCE-8296. Payment Term Priority needs to be unique"
 	@priority = "4"
 	test AssertPaymentTermPriorityIsUnique {
 		property portal.acceptance = "false";
 
-		// TODO COMMERCE-8296 AssertPaymentTermPriorityIsUnique pending implementation
+		task ("Given a new entry "Test" into the "Terms and Conditions".") {
+			CommerceNavigator.gotoPortlet(
+				category = "Order Management",
+				portlet = "Terms and Conditions");
 
+			CommercePaymentTerms.addTermsAndCondition(
+				termsAndConditionName = "Test",
+				termsAndConditionType = "Payment Terms",
+				valuePosition = "1");
+
+			Click(locator1 = "Button#BACK");
+		}
+
+		task ("When the Sales Manager create a new entry with a different name from "Test".") {
+			CommercePaymentTerms.addTermsAndCondition(
+				termsAndConditionName = "Terms and Condition Entry 1",
+				termsAndConditionType = "Payment Terms",
+				valuePosition = "1");
+		}
+
+		task ("Then the Sales Manager receives an error because the priority is not unique.") {
+			Alert.viewErrorMessage(errorMessage = "Error:Please enter a valid priority.");
+		}
 	}
 
 	@description = "[Please Update]"
@@ -131,18 +161,6 @@ definition {
 
 	}
 
-	@description = "[Please Update]"
-	@ignore = "Test Stub"
-	@priority = "4"
-	test PaymentTermNameIsUnique {
-		property portal.acceptance = "false";
-
-		// TODO COMMERCE-8283 PaymentTermNameIsUnique pending implementation
-
-	}
-
-	@description = "The Sales Manager can use the search bar to search a specific entry or can use the filters."
-	@priority = "4"
 	test UseFilterAndSearch {
 		property portal.acceptance = "false";
 
