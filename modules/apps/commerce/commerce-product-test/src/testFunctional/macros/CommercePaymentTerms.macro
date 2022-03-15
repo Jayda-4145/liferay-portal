@@ -1,0 +1,41 @@
+definition {
+
+	macro addTermsAndCondition {
+		LexiconEntry.gotoAdd();
+
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
+
+		Type(
+			locator1 = "TextInput#NAME",
+			value1 = "${termsAndConditionName}");
+
+		Select(
+			locator1 = "Select#TYPE",
+			value1 = "${termsAndConditionType}");
+
+		Type(
+			locator1 = "CommerceEntry#PRIORITY_FIELD",
+			value1 = "${valuePosition}");
+
+		Button.clickSubmitButton();
+
+		if ("${active}" == "true") {
+			ClickNoError(locator1 = "ToggleSwitch#ACTIVE");
+
+			Button.clickPublish();
+
+			Alert.viewSuccessMessage();
+		}
+	}
+
+	macro gotoEntryMenuItem {
+		Click(
+			key_value = "${termsAndConditionName}",
+			locator1 = "CommerceEntry#BODY_VERTICAL_ELLIPSIS");
+
+		MenuItem.clickNoError(menuItem = "${menuItem}");
+
+		Alert.viewSuccessMessage();
+	}
+
+} 
