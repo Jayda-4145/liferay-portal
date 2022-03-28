@@ -1069,12 +1069,81 @@ definition {
 	}
 
 	@description = "This test publishes a staged entry to live after deleting live entry."
-	@ignore = "Test Stub"
 	@priority = "3"
 	test CanPublishToLiveADeletedLiveEntry {
+		task ("Add staged entry with related asset.") {
+			User.logoutAndLoginPG(
+				userLoginEmailAddress = "userea@liferay.com",
+				userLoginFullName = "userfn userln");
 
-		// TODO LRQA-50759 Publish to live a deleted live entry (Message Board)
+			JSONStaging.enableLocalStaging(groupName = "Guest");
 
+			MessageBoardsAdmin.openMessageBoardsAdmin(siteURLKey = "guest-staging");
+
+			MessageboardsThread.addCP(
+				threadBody = "MB Thread Message Body",
+				threadSubject = "MB Thread Message Subject");
+		}
+
+		task ("Publish to live entry.") {
+			MessageBoardsAdmin.openMessageBoardsAdmin(siteURLKey = "guest-staging");
+
+			Staging.publishToLiveNowViaPortletCP();
+		}
+
+		task ("Delete only the live entry using Personal Data Erasure.") {
+			User.logoutAndLoginPG(
+				userLoginEmailAddress = "test@liferay.com",
+				userLoginFullName = "Test Test");
+
+			Navigator.openStagingSiteURL(defaultSite = "true");
+
+			User.openUsersAdmin();
+
+			User.deletePersonalDataCP(
+				userFirstName = "userfn",
+				userLastName = "userln");
+
+			GDPR.filterByScope(scope = "Regular Sites");
+
+			GDPR.filterByApplications(
+				applicationItemsCount = "4",
+				applications = "Message Boards",
+				totalItemsCount = "4");
+
+			GDPR.deleteSingleEntryCP(rowEntry = "MB Thread Message Subject");
+		}
+
+		task ("Assert entry is deleted from live.") {
+			User.openUsersAdmin();
+
+			User.activateCP(
+				userName = "userfn userln",
+				userScreenName = "usersn");
+
+			User.logoutAndLoginPG(
+				userLoginEmailAddress = "userea@liferay.com",
+				userLoginFullName = "userfn userln");
+
+			MessageBoardsAdmin.openMessageBoardsAdmin(siteURLKey = "guest");
+
+			MessageboardsThread.viewDefaultCP();
+		}
+
+		task ("Publish to live entry again.") {
+			MessageBoardsAdmin.openMessageBoardsAdmin(siteURLKey = "guest-staging");
+//failed step
+			Staging.publishToLiveNowViaPortletCP();
+		}
+		task ("Assert entry is present on live.") {
+			MessageBoardsAdmin.openMessageBoardsAdmin(siteURLKey = "guest");
+
+			MessageboardsThread.viewCP(
+				replyCount = "0",
+				threadBody = "MB Thread Message Body",
+				threadSubject = "MB Thread Message Subject",
+				userName = "userfn userln");
+		}
 	}
 
 	@priority = "4"
