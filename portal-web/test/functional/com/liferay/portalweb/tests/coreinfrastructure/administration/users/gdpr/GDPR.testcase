@@ -1068,13 +1068,79 @@ definition {
 		}
 	}
 
-	@description = "This test publishes a staged entry to live after deleting live entry."
-	@ignore = "Test Stub"
+	@description = "This test publishes a staged entry to live after deleting live entry, test with blog entries."
 	@priority = "3"
 	test CanPublishToLiveADeletedLiveEntry {
+		task ("Given add staged entry with related asset and publish to live this entry.") {
+			User.logoutAndLoginPG(
+				userLoginEmailAddress = "userea@liferay.com",
+				userLoginFullName = "userfn userln");
 
-		// TODO LRQA-50759 Publish to live a deleted live entry (Message Board)
+			JSONStaging.enableLocalStaging(groupName = "Guest");
 
+			BlogsNavigator.openBlogsAdmin(siteURLKey = "guest-staging");
+
+			Blogs.addEntry(
+				entryContent = "Blogs Entry Content",
+				entryTitle = "Blogs Entry Title");
+
+			Staging.publishViaSAP(
+				confirmMessage = "Are you sure you want to publish to live?",
+				entry = "Blogs Entry Title");
+		}
+
+		task ("When delete only the live entry using Personal Data Erasure.") {
+			User.logoutAndLoginPG(
+				userLoginEmailAddress = "test@liferay.com",
+				userLoginFullName = "Test Test");
+
+			Navigator.openStagingSiteURL(defaultSite = "true");
+
+			User.openUsersAdmin();
+
+			User.deletePersonalDataCP(
+				userFirstName = "userfn",
+				userLastName = "userln");
+
+			GDPR.filterByScope(scope = "Regular Sites");
+
+			GDPR.filterByApplications(
+				applicationItemsCount = "2",
+				applications = "Blogs",
+				totalItemsCount = "2");
+
+			GDPR.deleteLiveEntryCP(rowEntry = "Blogs Entry Title");
+		}
+
+		task ("Then assert entry is deleted from live.") {
+			User.openUsersAdmin();
+
+			User.activateCP(
+				userName = "userfn userln",
+				userScreenName = "usersn");
+
+			User.logoutAndLoginPG(
+				userLoginEmailAddress = "userea@liferay.com",
+				userLoginFullName = "userfn userln");
+
+			BlogsNavigator.openBlogsAdmin(siteURLKey = "guest");
+
+			Blogs.viewNoEntryCP();
+		}
+
+		task ("When publish to live entry again.") {
+			BlogsNavigator.openBlogsAdmin(siteURLKey = "guest-staging");
+
+			Staging.publishViaSAP(
+				confirmMessage = "Are you sure you want to publish to live?",
+				entry = "Blogs Entry Title");
+		}
+
+		task ("Then assert entry is present on live.") {
+			BlogsNavigator.openBlogsAdmin(siteURLKey = "guest");
+
+			Blogs.viewEntryPresent(entryTitle = "Blogs Entry Title");
+		}
 	}
 
 	@priority = "4"
