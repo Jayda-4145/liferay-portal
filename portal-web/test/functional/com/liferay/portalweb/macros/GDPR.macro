@@ -32,6 +32,10 @@ definition {
 			key_lastName = "${userLastName}",
 			locator1 = "ExportPersonalData#HEADER");
 
+		if (isSet(exportInProgressBar)) {
+			AssertElementPresent(locator1 = "ExportPersonalData#EXPORT_IN_PROGRESS_BAR");
+		}
+
 		while (IsElementPresent(key_status = "In Progress", locator1 = "ExportPersonalData#EXPORT_PROCESS_STATUS")) {
 			Pause(locator1 = "3000");
 		}
