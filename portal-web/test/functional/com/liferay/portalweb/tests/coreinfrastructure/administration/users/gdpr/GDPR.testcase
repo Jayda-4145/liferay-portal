@@ -1812,7 +1812,7 @@ definition {
 
 	@priority = "4"
 	test ExportAllEntries {
-		property portal.acceptance = "true";
+		property portal.acceptance = "jayda";
 
 		JSONLayout.addPublicLayout(
 			groupName = "Guest",
