@@ -1947,6 +1947,12 @@ definition {
 				tableEntry = "${tableEntry}",
 				tableEntryPartialTextList = "${tableEntry},Create Date,Completion Date");
 		}
+
+		LexiconEntry.gotoAdd();
+
+		for (var key_item : list "Application,Items,Last Available Export") {
+			AssertElementPresent(locator1 = "ExportPersonalData#APPLICATION_TABLE_HEAD_ITEM");
+		}
 	}
 
 	@description = "This test changes pagination and assert export processes display properly."
