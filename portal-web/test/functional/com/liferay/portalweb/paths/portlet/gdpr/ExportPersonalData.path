@@ -26,11 +26,6 @@
 	<td></td>
 </tr>
 <tr>
-	<td>APPLICATION_TABLE_HEAD_ITEM</td>
-	<td>//table//th[contains(.,'${key_item}')]</td>
-	<td></td>
-</tr>
-<tr>
 	<td>EXPORT_PROCESS_APPLICATION_STATUS</td>
 	<td>//div[contains(.,'${key_application}')]/span[contains(.,'${key_status}')]</td>
 	<td></td>
