@@ -194,14 +194,14 @@ definition {
 			CommerceProductImages.addDiagramImages(
 				imageTitles = "Black",
 				productType = "Diagram");
-			
+
 			CommerceDiagram.addPin(
 				pinNumber = "1",
 				position = "0,150",
 				quantity = "1",
 				selectType = "Linked to a SKU",
 				sku = "MIN93015");
-			
+
 			CommerceDiagram.addPin(
 				diagram = "Diagram Test 2",
 				pinNumber = "2",
@@ -238,7 +238,7 @@ definition {
 				quantity = "1",
 				selectType = "Linked to a SKU",
 				sku = "MIN93016A");
-			
+
 			CommerceDiagram.addPin(
 				pinNumber = "2",
 				position = "150,100",
@@ -259,7 +259,7 @@ definition {
 				password = "ttest",
 				urlAppend = "web/minium",
 				userEmailAddress = "buyer@liferay.com");
-			
+
 			CommerceAcceleratorsInitializer.gotoMiniumProductDetailsPage(productName = "Diagram Test 1");
 		}
 
