@@ -151,7 +151,7 @@ definition {
 	@description = "COMMERCE-8147. Assert a buyer can navigate from a diagram to a related diagram"
 	@priority = "4"
 	test VerifyAllPinTypeAndMappedProductInformation {
-		property portal.acceptance = "false";
+		property portal.acceptance = "jayda";
 
 		task ("Given a Buyer account is created") {
 			CommerceAcceleratorsInitializer.inviteNewMemberWithRoleToAccount(
