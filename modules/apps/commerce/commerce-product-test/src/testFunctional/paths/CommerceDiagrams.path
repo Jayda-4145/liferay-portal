@@ -68,6 +68,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>DIAGRAM_MAPPED_PRODUCTS_CONTENT_SPECIFIC</td>
+	<td>//div[contains(@class,'card')][contains(.,'Mapped Products')]//tr[@class][${key_row}]//td[contains(.,'${key_productName}')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>DIAGRAM_IMAGE_SVG_SPECIFIC</td>
 	<td>//div[contains(@class,'view-wrapper')]//*[name()='g']//*[name()='${key_imageItem}']</td>
 	<td></td>
@@ -112,6 +117,21 @@
 <tr>
 	<td>DIAGRAM_PRODUCT_TOOLTIP_LINKED_PRODUCT_NAME</td>
 	<td>//div[contains(@class,'diagram-tooltip')]//p//a[contains(text(),'${key_productName}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>DIAGRAM_PRODUCT_TOOLTIP_LINKED_VIEW</td>
+	<td>//div[contains(@class,'diagram-tooltip')]//div//a[contains(text(),'View')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>DIAGRAM_PRODUCT_TOOLTIP_QUANTITY</td>
+	<td>//div[contains(@class,'diagram-tooltip')]//p[contains(text(),'Quantity')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>DIAGRAM_PRODUCT_TOOLTIP_TEST_PRODUCT</td>
+	<td>//div[contains(@class,'diagram-tooltip')]//h4[contains(text(),'${key_productName}')]</td>
 	<td></td>
 </tr>
 <!--DIAGRAM_SETTINGS-->
