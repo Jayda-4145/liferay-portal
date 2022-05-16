@@ -281,7 +281,7 @@ definition {
 
 		task ("And if the Buyer clicks on a pin linked to "Test Product", the information that we can find inside are (Name, Quantity) and into the Mapped Product section (Pin number, Name)") {
 			CommerceDiagram.viewPinInProduct(pinNumber = "3");
-	
+
 			CommerceDiagram.assertPinToolTipInfoInProduct(
 				productName = "Test Product",
 				selectedType = "Not Linked to a Catalog");
