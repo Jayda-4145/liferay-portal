@@ -113,7 +113,7 @@ definition {
 			AssertElementPresent(
 				key_productName = "${productName}",
 				locator1 = "CommerceDiagrams#DIAGRAM_PRODUCT_TOOLTIP_LINKED_PRODUCT_NAME");
-			
+
 			AssertElementPresent(locator1 = "CommerceDiagrams#DIAGRAM_PRODUCT_TOOLTIP_QUANTITY");
 		}
 		else if ("${selectedType}" == "Linked to a Diagram") {
@@ -125,7 +125,7 @@ definition {
 			AssertElementPresent(
 				key_productName = "${productName}",
 				locator1 = "CommerceDiagrams#DIAGRAM_PRODUCT_TOOLTIP_TEST_PRODUCT");
-			
+
 			AssertElementPresent(locator1 = "CommerceDiagrams#DIAGRAM_PRODUCT_TOOLTIP_QUANTITY");
 		}
 	}
