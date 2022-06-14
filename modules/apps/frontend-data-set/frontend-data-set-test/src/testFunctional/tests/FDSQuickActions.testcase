@@ -14,19 +14,19 @@ definition {
 		User.firstLoginPG();
 
 		task ("Given Frontend Dataset sample portlet") {
-			// JSONLayout.addPublicLayout(
-			// 	groupName = "Guest",
-			// 	layoutName = "Frontend Data Set Test Page");
+			JSONLayout.addPublicLayout(
+				groupName = "Guest",
+				layoutName = "Frontend Data Set Test Page");
 
-			// JSONLayout.addWidgetToPublicLayout(
-			// 	groupName = "Guest",
-			// 	layoutName = "Frontend Data Set Test Page",
-			// 	widgetName = "Frontend Data Set Sample");
+			JSONLayout.addWidgetToPublicLayout(
+				groupName = "Guest",
+				layoutName = "Frontend Data Set Test Page",
+				widgetName = "Frontend Data Set Sample");
 
-			// JSONLayout.updateLayoutTemplateOfPublicLayout(
-			// 	groupName = "Guest",
-			// 	layoutName = "Frontend Data Set Test Page",
-			// 	layoutTemplate = "1 Column");
+			JSONLayout.updateLayoutTemplateOfPublicLayout(
+				groupName = "Guest",
+				layoutName = "Frontend Data Set Test Page",
+				layoutTemplate = "1 Column");
 
 			Navigator.gotoPage(pageName = "Frontend Data Set Test Page");
 
