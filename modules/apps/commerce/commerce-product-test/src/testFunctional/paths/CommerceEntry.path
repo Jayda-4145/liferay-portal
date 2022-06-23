@@ -708,7 +708,7 @@
 	<td>//div[contains(@class,'diagram-pins-container')]//*[name()='svg']//*[name()='image' and contains (@href,'${key_image}')]</td>
 	<td></td>
 </tr>
-<tr>
+<!-- <tr>
 	<td>DEFAULT_DIAMETER_CUSTOM_RADIUS</td>
 	<td>//label[contains (.,'Custom Radius')]//..//input</td>
 	<td></td>
@@ -727,7 +727,7 @@
 	<td>DEFAULT_DIAMETER_CUSTOM_COLOR_SELECTION</td>
 	<td>//label[contains(.,'Custom Color')]//..//input[contains(@aria-label,'Color selection')]</td>
 	<td></td>
-</tr>
+</tr> -->
 <tr>
 	<td>DIAGRAM_ADD_BUTTON</td>
 	<td>//div[contains(@class,'diagram-footer')]//button[contains(.,'Add Pin')]</td>
