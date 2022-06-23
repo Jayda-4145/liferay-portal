@@ -703,12 +703,12 @@
 	<td>//div[contains(@class,'diagram-pins-container')]//*[name()='svg']//*[name()='image' and contains (@href,'${key_image}')]</td>
 	<td></td>
 </tr>
-<tr>
+<!-- <tr>
 	<td>DEFAULT_DIAMETER_CUSTOM_RADIUS</td>
-	<td>//label[contains (.,'Custom Radius')]//..//input</td>
+	<td>//label[contains (.,'Custom')]//..//input</td>
 	<td></td>
-</tr>
-<tr>
+</tr> -->
+<!-- <tr>
 	<td>VERIFY_PIN_RADIUS</td>
 	<td>//div[contains(@class,'diagram-pins-container')]//*[name()='svg']//*[name()='circle' and @r='${key_radius}']</td>
 	<td></td>
@@ -721,6 +721,16 @@
 <tr>
 	<td>DEFAULT_DIAMETER_CUSTOM_COLOR_SELECTION</td>
 	<td>//label[contains(.,'Custom Color')]//..//input[contains(@aria-label,'Color selection')]</td>
+	<td></td>
+</tr> -->
+<tr>
+	<td>DEFAULT_DIAMETER_CUSTOM_RADIUS</td>
+	<td>//label[contains (.,'Custom')]//..//div[contains(@class,'range-input')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>DEFAULT_DIAMETER_CUSTOM_RADIUS_PIN</td>
+	<td>//div[contains(@class,'view-wrapper')]//*[name()='g' and @class='pin-radius-handler' and @transform]</td>
 	<td></td>
 </tr>
 <tr>

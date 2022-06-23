@@ -323,63 +323,81 @@ definition {
 		}
 	}
 
-	@description = "This is a test for COMMERCE-7023. EditTheDefaultSettingForPinsCreation"
+	@description = "COMMERCE-7023. I want to be able to change the radius of the pin"
 	@priority = "3"
 	test EditTheDefaultSettingForPinsCreation {
-		property portal.acceptance = "quarantine";
-		property portal.release = "quarantine";
-		property portal.upstream = "quarantine";
+		// task ("Given a Minium site") {
+		// 	CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
+		// }
 
-		// TODO COMMERCE-8268 Test needs refactoring due to a failure locating the Default Diameter button.
+		task ("Given a Diagram with the "Type" set to "Default", a png image uploaded as "Diagram File" and 1 pin linked to an SKU within the image") {
+			CommerceProducts.openProductsAdmin();
 
-		CommerceNavigator.gotoPortlet(
-			category = "Product Management",
-			portlet = "Products");
+			CPCommerceCatalog.newProductsEntry(
+				productCatalog = "Master",
+				productName = "Diagram1",
+				productType = "Diagram");
 
-		CPCommerceCatalog.newProductsEntry(
-			productCatalog = "Master",
-			productName = "Diagram T-Shirt",
-			productType = "Diagram");
+			CommerceEntry.gotoMenuTab(menuTab = "Diagram");
 
-		CommerceEntry.gotoMenuTab(menuTab = "Diagram");
+			CommerceProductImages.addDiagramImages(
+				imageTitles = "Black",
+				productType = "Diagram");
 
-		CommerceProductImages.addDiagramImages(
-			imageTitles = "Black",
-			productType = "Diagram");
+			CommerceDiagram.addPin(
+				pinNumber = "1",
+				quantity = "1",
+				selectType = "Linked to a SKU",
+				sku = "MIN93015");
 
-		Button.clickPublish();
+			Button.clickPublish();
 
-		Alert.viewSuccessMessage();
+			Alert.viewSuccessMessage();
+		}
 
-		CommerceDiagram.addPin(
-			label = "Test",
-			pinNumber = "1",
-			quantity = "1",
-			selectType = "Not Linked to a Catalog");
+		// task ("When the admin go into Commerce -> Products") {
+		// 	CommerceProducts.openProductsAdmin();
 
-		Click(
-			key_text = "Default Diameter",
-			locator1 = "Button#ANY");
+		// 	CommerceNavigator.searchEntry(entryName = "Diagram1");
 
-		AssertElementPresent(
-			key_radius = "10",
-			locator1 = "CommerceEntry#VERIFY_PIN_RADIUS");
+		// 	CommerceNavigator.gotoEntry(entryName = "Diagram1");
+		// }
+			
+		task ("And click on the diagram product and go into the "Diagram" tab") {
+			CommerceEntry.gotoMenuTab(menuTab = "Diagram");
+		}
 
-		CommerceEntry.verifyCostumRadiusWithCostumValue(key_list = "1,2,3,4,5");
+		task ("Then the admin can use the default preset (Small, Medium, Large)") {
+			// CommerceEntry.changeCustomRadius(
+			// 	AttributeValue = "scale(0.5)",
+			// 	pinSize = "Medium",
+			// 	pinSizeEdit = "Small");
 
-		AssertElementPresent(
-			key_radius = "15",
-			locator1 = "CommerceEntry#VERIFY_PIN_RADIUS");
+			// CommerceEntry.changeCustomRadius(
+			// 	AttributeValue = "scale(1)",
+			// 	pinSize = "Small",
+			// 	pinSizeEdit = "Medium");
 
-		CommerceEntry.verifyCostumRadiusWithDefaultValue();
+			CommerceEntry.changeCustomRadius(
+				AttributeValue = "scale(2)",
+				pinSize = "Medium",
+				pinSizeEdit = "Large");
+		}
 
-		CommerceEntry.changePinColor(color = "#FF0000");
+		task ("And verify if the "Custom" slider actually change the diameter of the pin") {
+			//
+			CommerceEntry.changeCustomRadius(
+				AttributeValue = "scale(1.75)",
+				moveForce = "10",
+				pinSize = "Large",
+				pinSizeChange = "Custom");
 
-		AssertElementPresent(
-			key_strokeColor = "#FF0000",
-			locator1 = "CommerceEntry#VERIFY_PIN_COLOR_STROKE");
-
-		Button.clickPublish();
+			CommerceEntry.changeCustomRadius(
+				AttributeValue = "scale(0.5)",
+				moveForce = "-90",
+				pinSize = "Custom",
+				pinSizeChange = "Small");
+		}
 	}
 
 	@description = "This is a test for COMMERCE-7126. RemoveDiagramProduct"
