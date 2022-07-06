@@ -14,33 +14,16 @@ definition {
 
 		User.firstLoginPG();
 
-		ApplicationsMenu.gotoPortlet(
-			category = "Sites",
-			panel = "Control Panel",
-			portlet = "Sites");
+		JSONGroup.addGroup(groupName = "Site Name");
 
-		Site.addBlankCP(siteName = "Site Name");
+		JSONLayout.addPublicLayout(
+			groupName = "Site Name",
+			layoutName = "Staging Test Page");
 
-		ProductMenu.gotoPortlet(
-			category = "Site Builder",
-			portlet = "Pages");
-
-		PagesAdmin.addPage(
-			pageName = "Staging Test Page",
-			sitePageType = "Widget Page");
-
-		PagesAdmin.configurePage(
-			columnName = "1 Column",
-			pageName = "Staging Test Page",
-			sitePageType = "Widget Page");
-
-		Navigator.gotoSitePage(
-			pageName = "Staging Test Page",
-			siteName = "Site Name");
-
-		Portlet.addPG(
-			pageName = "Staging Test Page",
-			portletName = "Calendar");
+		JSONLayout.addWidgetToPublicLayout(
+			groupName = "Site Name",
+			layoutName = "Staging Test Page",
+			widgetName = "Calendar");
 	}
 
 	tearDown {
@@ -230,11 +213,7 @@ definition {
 	test SchedulePublishToLiveWithEventAndResource {
 		Navigator.openSiteURL(siteName = "Site Name");
 
-		ProductMenu.gotoPortlet(
-			category = "Publishing",
-			portlet = "Staging");
-
-		Staging.activateStagingCP(siteName = "Site Name");
+		JSONStaging.enableLocalStaging(groupName = "Site Name");
 
 		Navigator.gotoStagedSitePage(
 			pageName = "Staging Test Page",
