@@ -33,6 +33,8 @@ definition {
 	@description = "This is a test for COMMERCE-9729. As a Sales Manager, I want to set default Account Delivery Terms per channel"
 	@priority = "3"
 	test CanHaveAllChannelsLinkedToADeliveryTerm {
+		property portal.acceptance = "jayda";
+
 		task ("Given the Admin created two Delivery terms entries with different priorities") {
 			CommerceJSONTermsAndConditionsAPI._addCommerceTermsAndConditions(
 				termsCount = "2",
