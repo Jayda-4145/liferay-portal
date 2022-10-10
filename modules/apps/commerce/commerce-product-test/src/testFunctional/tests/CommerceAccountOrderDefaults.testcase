@@ -1273,18 +1273,18 @@ definition {
 		Click(locator1 = "Button#CONTINUE");
 
 		CommerceCheckout.viewCheckoutOrderSummary(
-				addressAddress = "1400 Montefino Ave",
-				addressCity = "Diamond Bar",
-				addressCountry = "United States",
-				addressName = "Billing and Shipping Address Entry 1",
-				billingAddressAddress = "1400 Montefino Ave",
-				billingAddressCity = "Diamond Bar",
-				billingAddressCountry = "United States",
-				billingAddressName = "Billing and Shipping Address Entry 1",
-				productName = "U-Joint",
-				productQuantity = "1",
-				productUnitPrice = "24",
-				shippingMethod = "Standard");
+			addressAddress = "1400 Montefino Ave",
+			addressCity = "Diamond Bar",
+			addressCountry = "United States",
+			addressName = "Billing and Shipping Address Entry 1",
+			billingAddressAddress = "1400 Montefino Ave",
+			billingAddressCity = "Diamond Bar",
+			billingAddressCountry = "United States",
+			billingAddressName = "Billing and Shipping Address Entry 1",
+			productName = "U-Joint",
+			productQuantity = "1",
+			productUnitPrice = "24",
+			shippingMethod = "Standard");
 	}
 
 	@description = "COMMERCE-9733. As a sales manager, I want to set a default account billing address per channel when the buyer users are placing orders"
