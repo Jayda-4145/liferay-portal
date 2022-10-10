@@ -1095,6 +1095,198 @@ definition {
 		}
 	}
 
+	@description = "COMMERCE-9873. As a sales manager, I want to "
+	@priority = "3"
+	test CanSetDefaultAddressFromDetailsTab {
+		property portal.acceptance = "jayda";
+
+		task ("Given 2 Minium sites and a buyer user is associated with the account and both sites") {
+			Accounts.gotoAssigneeTab(assigneeTab = "Addresses");
+
+			for (var typeList : list "Billing,Shipping,Billing and Shipping") {
+				Accounts.addAddressViaSetDefaultAddress(
+					addressCity = "Diamond Bar",
+					addressCountry = "United States",
+					addressName = "${typeList} Address Entry 1",
+					addressPostalCode = "91765",
+					addressRegion = "California",
+					addressStreet1 = "1400 Montefino Ave",
+					addressType = "${typeList}",
+					phoneNumber = "+1-877-543-3729");
+			}
+
+			for (var num : list "1,2") {
+				CommerceAccelerators.initializeNewSiteViaAccelerator(
+					siteName = "Minium ${num}",
+					siteTemplateName = "Minium");
+
+				JSONUser.addUserToSite(
+					groupName = "Minium ${num}",
+					userEmailAddress = "buyer@liferay.com");
+			}
+		}
+
+		Accounts.openAccountsAdmin();
+
+		LexiconEntry.gotoEntry(rowEntry = "Commerce Account");
+
+		Accounts.gotoAssigneeTab(assigneeTab = "Channel Defaults");
+
+		for (var typeList : list "Billing,Shipping") {
+			Accounts.addDefaultCommerceAddressEntry(
+				addressEntry = "${typeList} Address Entry 1",
+				addressType = "${typeList}");
+		}
+
+		for (var typeList : list "Billing,Shipping") {
+			Accounts.viewDefaultDeliveryCommerceTermsEntry(
+				termEntry = "All Channels,${typeList} Address Entry 1",
+				termType = "${typeList}");
+		}
+
+		for (var typeList : list "Billing,Shipping") {
+			Accounts.removeDefaultCommerceTerms(
+				entryDetails = "${typeList} Address Entry 1",
+				termType = "${typeList}");
+		}
+
+		for (var typeList : list "Billing,Shipping") {
+			Accounts.addDefaultCommerceAddressEntry(
+				addressEntry = "${typeList} Address Entry 1",
+				addressType = "${typeList}",
+				channelEntry = "Minium 1 Portal");
+		}
+
+		User.logoutPG();
+
+		CommerceLogin.miniumLogin(
+			password = "test",
+			urlAppend = "web/minium-2",
+			userEmailAddress = "buyer@liferay.com");
+
+		FrontStore.addInitializerProductToCart(
+			productName = "U-Joint",
+			productQuantity = "1");
+
+		CommerceCheckout.gotoCheckout();
+
+		AssertElementPresent(
+			key_fieldLabel = "Choose Shipping Address",
+			key_value = "Shipping Address Entry 1",
+			locator1 = "CommerceEntry#SELECT_ASSERT_SELECTED_VALUE");
+
+		for (var fieldNames : list "Name,Address,Zip,City") {
+			AssertElementPresent(
+				key_fieldName = "${fieldNames}",
+				locator1 = "CommerceAccelerators#CHECKOUT_GENERIC_TEXT_INPUT_DISABLED");
+		}
+
+		Click(locator1 = "Button#CONTINUE");
+
+		Click(locator1 = "Button#CONTINUE");
+
+		task ("And arrives to the billing address section, the default billing address is pre-selected") {
+			AssertElementPresent(
+				key_fieldLabel = "Choose Billing Address",
+				key_value = "Billing Address Entry 1",
+				locator1 = "CommerceEntry#SELECT_ASSERT_SELECTED_VALUE");
+
+			for (var fieldNames : list "Name,Address,Zip,City") {
+				AssertElementPresent(
+					key_fieldName = "${fieldNames}",
+					locator1 = "CommerceAccelerators#CHECKOUT_GENERIC_TEXT_INPUT_DISABLED");
+			}
+
+			Click(locator1 = "Button#CONTINUE");
+		}
+
+		task ("Then after completing the checkout, the default billing address is visible in the Order Summary") {
+			CommerceCheckout.viewCheckoutOrderSummary(
+				addressAddress = "1400 Montefino Ave",
+				addressCity = "Diamond Bar",
+				addressCountry = "United States",
+				addressName = "Shipping Address Entry 1",
+				billingAddressAddress = "1400 Montefino Ave",
+				billingAddressCity = "Diamond Bar",
+				billingAddressCountry = "United States",
+				billingAddressName = "Billing Address Entry 1",
+				productName = "U-Joint",
+				productQuantity = "1",
+				productUnitPrice = "24",
+				shippingMethod = "Standard");
+		}
+
+		User.logoutAndLoginPG();
+
+		Accounts.openAccountsAdmin();
+
+		LexiconEntry.gotoEntry(rowEntry = "Commerce Account");
+
+		Accounts.gotoAssigneeTab(assigneeTab = "Channel Defaults");
+
+		for (var typeList : list "Billing,Shipping") {
+			Accounts.addDefaultCommerceAddressEntry(
+				addressEntry = "Billing and Shipping Address Entry 1",
+				addressType = "${typeList}",
+				channelEntry = "All Other Channels");
+		}
+
+		for (var typeList : list "Billing,Shipping") {
+			Accounts.viewDefaultDeliveryCommerceTermsEntry(
+				row = "2",
+				termEntry = "All Other Channels,Billing and Shipping Address Entry 1",
+				termType = "${typeList}");
+		}
+
+		User.logoutPG();
+
+		CommerceLogin.miniumLogin(
+			password = "test",
+			urlAppend = "web/minium-3",
+			userEmailAddress = "buyer@liferay.com");
+
+		FrontStore.addInitializerProductToCart(
+			productName = "U-Joint",
+			productQuantity = "1");
+
+		CommerceCheckout.gotoCheckout();
+
+		task ("And arrives in the shipping address section, the default shipping address is pre-selected") {
+			AssertElementPresent(
+				key_fieldLabel = "Choose Shipping Address",
+				key_value = "Billing and Shipping Address Entry 1",
+				locator1 = "CommerceEntry#SELECT_ASSERT_SELECTED_VALUE");
+
+			for (var fieldNames : list "Name,Address,Zip,City") {
+				AssertElementPresent(
+					key_fieldName = "${fieldNames}",
+					locator1 = "CommerceAccelerators#CHECKOUT_GENERIC_TEXT_INPUT_DISABLED");
+			}
+		}
+
+		Check.checkToggleSwitch(
+			checkboxName = "Use shipping address as billing address",
+			locator1 = "Checkbox#ANY_CHECKBOX");
+
+		Click(locator1 = "Button#CONTINUE");
+
+		Click(locator1 = "Button#CONTINUE");
+
+		CommerceCheckout.viewCheckoutOrderSummary(
+				addressAddress = "1400 Montefino Ave",
+				addressCity = "Diamond Bar",
+				addressCountry = "United States",
+				addressName = "Billing and Shipping Address Entry 1",
+				billingAddressAddress = "1400 Montefino Ave",
+				billingAddressCity = "Diamond Bar",
+				billingAddressCountry = "United States",
+				billingAddressName = "Billing and Shipping Address Entry 1",
+				productName = "U-Joint",
+				productQuantity = "1",
+				productUnitPrice = "24",
+				shippingMethod = "Standard");
+	}
+
 	@description = "COMMERCE-9733. As a sales manager, I want to set a default account billing address per channel when the buyer users are placing orders"
 	@priority = "3"
 	test CanSetDefaultBillingAddressPerChannel {
