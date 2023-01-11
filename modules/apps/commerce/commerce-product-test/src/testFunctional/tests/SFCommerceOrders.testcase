@@ -588,6 +588,7 @@ definition {
 	@description = "This is a use case for COMMERCE-3111. Assert that user can see an open order after deleting the product, and the product is no longer in the order."
 	@priority = "3"
 	test CanSeeAPlacedOrderWithDeletedProduct {
+		property custom.properties = "jsonws.web.service.paths.excludes=${line.separator}company.security.strangers.verify=false";
 		property portal.acceptance = "false";
 
 		task ("Given a minium site with a buyer user and creating an order with a product") {
