@@ -39,10 +39,6 @@ definition {
 			Click(
 				key_text = "Save as Draft",
 				locator1 = "Button#ANY");
-
-			AssertElementPresent(
-				key_status = "Draft",
-				locator1 = "CommerceEntry#WORKFLOW_STATUS");
 		}
 
 		task ("And go back and open the first approved product again") {
@@ -55,13 +51,18 @@ definition {
 		}
 
 		task ("And click on 'Save as Draft'") {
-			ClickNoError(
+			AssertClickNoError(
 				key_text = "Save as Draft",
-				locator1 = "Button#ANY");
+				locator1 = "Button#ANY",
+				value1 = "Save as Draft");
 		}
 
 		task ("And the admin click on 'OK'") {
-			AssertConfirm(value1 = "There is already a draft version of this product. Continuing will replace that draft version with this draft version. Do you wish to proceed?");
+			AssertConfirm.assertConfirmationNoError(value1 = "There is already a draft version of this product. Continuing will replace that draft version with this draft version. Do you wish to proceed?");
+
+			AssertElementPresent(
+				key_status = "Draft",
+				locator1 = "CommerceEntry#WORKFLOW_STATUS");
 		}
 
 		task ("And the admin now will see 3 products, one is approved, one is draft and the last one is incomplete") {
