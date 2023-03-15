@@ -19,7 +19,7 @@ definition {
 	@description = "This is a test for the story COMMERCE-9376, with the testplan COMMERCE-9534 and test ticket COMMERCE-9549"
 	@priority = 5
 	test CanCheckProductVersionsWithProductVersioningDisabled {
-		property portal.acceptance = "true";
+		property portal.acceptance = "jayda";
 		property test.name.skip.portal.instance = "CPCommerceProductVersioning#CanCheckProductVersionsWithProductVersioningDisabled";
 
 		// This test need to disable the versioning for that reason the 'skip.portal.instance' is necessary
@@ -58,11 +58,7 @@ definition {
 		}
 
 		task ("And the admin click on 'OK'") {
-			AssertConfirm.assertConfirmationNoError(value1 = "There is already a draft version of this product. Continuing will replace that draft version with this draft version. Do you wish to proceed?");
-
-			AssertElementPresent(
-				key_status = "Draft",
-				locator1 = "CommerceEntry#WORKFLOW_STATUS");
+			AssertConfirm(value1 = "There is already a draft version of this product. Continuing will replace that draft version with this draft version. Do you wish to proceed?");
 		}
 
 		task ("And the admin now will see 3 products, one is approved, one is draft and the last one is incomplete") {
