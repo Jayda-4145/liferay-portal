@@ -577,7 +577,7 @@ definition {
 	@description = "COMMERCE-10247 Verify that the admin can complete the checkout using the mini cart widget with the Buyer Order Approval Workflow"
 	@priority = 5
 	test CanUseMiniCartWidgetToCheckoutWithBuyerOrderApprovalWorkflow {
-		property portal.acceptance = "false";
+		property portal.acceptance = "jayda";
 		property test.name.skip.portal.instance = "CommerceMiniCart#CanUseMiniCartWidgetToCheckoutWithBuyerOrderApprovalWorkflow";
 
 		var approvedCount = 0;
@@ -602,7 +602,7 @@ definition {
 		}
 
 		task ("And the admin add the mini cart widget") {
-			ApplicationsMenu.gotoSite(site = "Minium");
+			Navigator.openWithAppendToBaseURL(urlAppend = "web/minium/catalog");
 
 			CommerceAcceleratorsInitializer.addPortlet(portletName = "Mini Cart");
 		}
