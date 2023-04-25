@@ -177,7 +177,7 @@ definition {
 	@description = "This is a test for COMMERCE-10449. As a buyer, I can enable cookies preference handling with products comparison"
 	@priority = 5
 	test EnableCookiesPreferenceHandlingWithProductsComparison {
-		property portal.acceptance = "true";
+		property portal.acceptance = "jayda";
 
 		task ("Given enables cookie preference handling and declines functional cookies") {
 			CookieNavigator.gotoInstanceSettings(portlet = "Preference Handling");
