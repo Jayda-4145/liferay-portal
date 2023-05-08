@@ -190,9 +190,33 @@ definition {
 				var specificationPriority = ${specificationPriority} + 1;
 			}
 		}
+//TODO
+		if (isSet(categories)) {
+			var categories = 0;
+
+			for (var specificationKeyValue : list ${specifications}) {
+				var categories = '''
+		      			"categories": [
+						{
+							"externalReferenceCode": "622252ea-f8ad-7683-982d-bbbbb5854812",
+							"id": 46019,
+							"name": "Cat",
+							"vocabulary": "topic"
+						}
+					],
+				''';
+			}
 
 		if (!(isSet(unspc))) {
 			var unspc = "";
+		}
+
+		if (!(isSet(userEmailAddress))) {
+			var userEmailAddress = "test@liferay.com";
+		}
+
+		if (!(isSet(userPassword))) {
+			var userPassword = "test";
 		}
 
 		if (!(isSet(weight))) {
@@ -203,17 +227,20 @@ definition {
 			var width = 0;
 		}
 
-		var catalogId = CommerceJSONCatalogsAPI._getCommerceCatalogIdByName(catalogName = ${catalogName});
+		var catalogId = CommerceJSONCatalogsAPI._getCommerceCatalogIdByName(
+			baseURL = ${baseURL},
+			catalogName = ${catalogName},
+			userEmailAddress = ${userEmailAddress});
 
 		var curl = '''
 			${baseURL}/o/headless-commerce-admin-catalog/v1.0/products \
-				-u test@liferay.com:test \
+				-u ${userEmailAddress}:${userPassword} \
 				-H 'accept: application/json' \
 				-H 'Content-Type: application/json' \
 				-d '{
 					"active": true,
 					"catalogId": "${catalogId}",
-					"categories": [],
+					"categories": [${categories}],
 					"customFields": [],
 					"description": {
 						"en_US": "${productDescription}"
@@ -1306,6 +1333,30 @@ definition {
 		}
 
 		return ${productIds};
+	}
+
+	macro _getCommerceProductCategoryUsingERC {
+		Variables.assertDefined(parameterList = ${productERC});
+
+		var baseURL = PropsUtil.get("portal.url");
+
+		if (!(isSet(userEmailAddress))) {
+			var userEmailAddress = "test@liferay.com";
+		}
+
+		if (!(isSet(userPassword))) {
+			var userPassword = "test";
+		}
+
+		var curl = '''
+			${baseURL}/o/headless-commerce-admin-catalog/v1.0/products/by-externalReferenceCode/${productERC} \
+				-u ${userEmailAddress}:${userPassword} \
+				-H 'accept: application/json' \
+		''';
+
+		var response = JSONCurlUtil.get(${curl});
+
+		return ${response};
 	}
 
 }

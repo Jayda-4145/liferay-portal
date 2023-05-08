@@ -7,11 +7,106 @@ definition {
 	property testray.main.component.name = "Product Info Management";
 
 	setUp {
-		CommerceConfiguration.commerceSetUp(storeFront = "true");
+		// CommerceConfiguration.commerceSetUp(storeFront = "true");
+		CommerceConfiguration.commerceSetUp();
 	}
 
 	tearDown {
 		CommerceConfiguration.commerceTearDown();
+	}
+
+	@description = "This is a test for COMMERCE-10603. "
+	@priority = 3
+	test Test {
+		property portal.acceptance = "false";
+
+		task ("Create DXP Site with Commerce") {
+			CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium Demo");
+		}
+
+		JSONCategory.addCategory(
+			groupName = "Global",
+			title = "Cat",
+			vocabularyName = "Topic");
+
+		Category.openCategoriesAdmin(siteURLKey = "global");
+
+		LAR.exportPortlet(larFileName = "Category_Topic_Cat.portlet.lar");
+
+		CommerceProducts.openProductsAdmin();
+
+		CommerceNavigator.gotoEntry(entryName = "ABS Sensor");
+
+		task ("And the category related to Topic is also selected inside the product") {
+			Click(
+				key_fieldName = "Topic",
+				locator1 = "Button#SELECT_BUTTON");
+
+			AssetCategorization.selectCategories(categoryNameList = "Cat");
+
+			Button.clickPublish();
+		}
+
+//TODO
+		// CommerceJSONProductsAPI._patchCommerceProductImageUsingERC();
+		// CommerceJSONProductsAPI._getCommerceProductCategoryUsingERC(productERC = "MIN93015minium-full-initializer");
+
+		var responseBody = CommerceJSONProductsAPI._getCommerceProductCategoryUsingERC(productERC = "MIN93015minium-full-initializer");
+
+		for (var categories : list "externalReferenceCode,id,name,vocabulary") {
+			var status = JSONUtil.getWithJSONPath(${responseBody}, "$..categories..${categories}");
+		}
+
+		for (var categories : list "externalReferenceCode,id,name,vocabulary") {
+			var response = JSONCurlUtil.get(${curl}, "$..categories..${categories}");
+
+			echo(${responseBody});
+
+			return ${responseBody};
+		}
+//end
+		HeadlessPortalInstanceAPI.addPortalInstance(
+			domain = "www.able.com",
+			portalInstanceId = "www.able.com",
+			virtualHost = "www.able.com");
+
+		User.firstLoginPG(
+			password = "test",
+			userEmailAddress = "test@www.able.com",
+			virtualHostsURL = "http://www.able.com:8080");
+
+		task ("Create DXP Site with Commerce") {
+			CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
+		}
+
+		User.logoutPG();
+
+		User.firstLoginUI(
+			password = "test",
+			specificURL = "http://www.able.com:8080/",
+			userEmailAddress = "test@www.able.com");
+
+		Category.openCategoriesAdmin(
+			baseURL = "http://www.able.com:8080",
+			siteURLKey = "global");
+
+		LAR.importPortlet(larFileName = "Category_Topic_Cat.portlet.lar");
+
+		CommerceJSONProductsAPI._addCommerceProduct(
+			baseURL = "http://www.able.com:8080",
+			catalogName = "Minium",
+			externalReferenceCode = "MIN93015minium-full-initializer",
+			productName = "Imported ABS Sensor",
+			productType = "Simple",
+			userEmailAddress = "test@www.able.com");
+
+		CommerceProducts.openProductsAdmin(baseURL = "http://www.able.com:8080");
+
+		CommerceNavigator.searchEntry(entryName = "ABS");
+
+		CommerceNavigator.gotoEntry(entryName = "Imported ABS Sensor");
+
+		AssetCategorization.viewCategory(categoryName = "Cat");
 	}
 
 	@description = "This is a test for COMMERCE-6269. AddAnOptionAndVerifyIfIsPresent"
