@@ -577,7 +577,7 @@ definition {
 	@priority = 3
 	test CanOrderManagerManageOrderWorkflow {
 		property custom.properties = "jsonws.web.service.paths.excludes=${line.separator}company.security.strangers.verify=false";
-		property portal.acceptance = "false";
+		property portal.acceptance = "jayda";
 
 		task ("Given a buyer user and an order manager are created and associated with Minium site") {
 			CommerceEntry.addAccountEntryUser(
