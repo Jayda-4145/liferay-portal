@@ -647,9 +647,12 @@ definition {
 		}
 
 		task ("When the order manager goes to view this order in Pending Orders page") {
-			User.logoutAndLoginPG(
-				userLoginEmailAddress = "ordermanager@liferay.com",
-				userLoginFullName = "Order Manager");
+			User.logoutPG();
+
+			CommerceLogin.miniumLogin(
+				password = "test",
+				urlAppend = "web/minium",
+				userEmailAddress = "ordermanager@liferay.com");
 
 			Navigator.openWithAppendToBaseURL(urlAppend = "web/minium/pending-orders");
 
@@ -677,9 +680,12 @@ definition {
 		}
 
 		task ("But if the buyer resubmits the order") {
-			User.logoutAndLoginPG(
-				userLoginEmailAddress = "buyer@liferay.com",
-				userLoginFullName = "Buyer User");
+			User.logoutPG();
+
+			CommerceLogin.miniumLogin(
+				password = "test",
+				urlAppend = "web/minium",
+				userEmailAddress = "buyer@liferay.com");
 
 			Navigator.openWithAppendToBaseURL(urlAppend = "web/minium/pending-orders");
 
@@ -691,9 +697,12 @@ definition {
 		}
 
 		task ("And the order manager approves the order") {
-			User.logoutAndLoginPG(
-				userLoginEmailAddress = "ordermanager@liferay.com",
-				userLoginFullName = "Order Manager");
+			User.logoutPG();
+
+			CommerceLogin.miniumLogin(
+				password = "test",
+				urlAppend = "web/minium",
+				userEmailAddress = "ordermanager@liferay.com");
 
 			Navigator.openWithAppendToBaseURL(urlAppend = "web/minium/pending-orders");
 
