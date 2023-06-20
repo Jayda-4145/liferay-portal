@@ -529,7 +529,7 @@ definition {
 	test CanCreateNewRelationTypeWithXSS {
 		property osgi.module.configuration.file.names = "com.liferay.commerce.product.configuration.CPDefinitionLinkTypeConfiguration_custom-relation.config";
 		property osgi.module.configurations = "type=\"<script>alert(1);</script>\"";
-		property portal.acceptance = "true";
+		property portal.acceptance = "jayda";
 
 		task ("When the admin creates a product relation using the XSS type") {
 			CommerceProducts.openProductsAdmin();
