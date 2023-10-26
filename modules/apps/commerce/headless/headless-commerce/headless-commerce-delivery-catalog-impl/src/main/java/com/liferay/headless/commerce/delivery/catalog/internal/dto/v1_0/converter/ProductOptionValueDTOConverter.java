@@ -25,6 +25,7 @@ import com.liferay.commerce.product.model.CPDefinitionLink;
 import com.liferay.commerce.product.model.CPDefinitionOptionRel;
 import com.liferay.commerce.product.model.CPDefinitionOptionValueRel;
 import com.liferay.commerce.product.model.CPInstance;
+import com.liferay.commerce.product.model.CPInstanceModel;
 import com.liferay.commerce.product.model.CProduct;
 import com.liferay.commerce.product.option.CommerceOptionValue;
 import com.liferay.commerce.product.option.CommerceOptionValueHelper;
@@ -37,6 +38,9 @@ import com.liferay.commerce.product.util.CPInstanceHelper;
 import com.liferay.commerce.product.util.CPJSONUtil;
 import com.liferay.commerce.service.CPDefinitionInventoryLocalService;
 import com.liferay.headless.commerce.delivery.catalog.dto.v1_0.ProductOptionValue;
+import com.liferay.headless.commerce.delivery.catalog.dto.v1_0.SkuOption;
+import com.liferay.petra.function.transform.TransformUtil;
+import com.liferay.petra.string.StringUtil;
 import com.liferay.portal.configuration.module.configuration.ConfigurationProvider;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -45,6 +49,9 @@ import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.language.Language;
+import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.kernel.util.UnicodeProperties;
+import com.liferay.portal.kernel.util.UnicodePropertiesBuilder;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.vulcan.dto.converter.DTOConverter;
@@ -141,23 +148,41 @@ public class ProductOptionValueDTOConverter
 								return null;
 							}
 
-							JSONArray selectedJSONArray =
-								CPJSONUtil.toJSONArray(
-									_cpDefinitionOptionRelLocalService.
-										getCPDefinitionOptionRelKeysCPDefinitionOptionValueRelKeys(
-											selectedCPInstance.
-												getCPInstanceId()));
-
 							List<CommerceOptionValue> commerceOptionValues =
-								_commerceOptionValueHelper.
-									getCPDefinitionCommerceOptionValues(
-										selectedCPInstance.getCPDefinitionId(),
-										selectedJSONArray.toString());
+								new ArrayList<>();
+
+							JSONArray jsonArray =
+								_getSelectedSkuOptionsJSONArray(
+									cpDefinitionOptionRel,
+									cpDefinitionOptionValueRel,
+									(SkuOption[])
+										dtoConverterContext.getAttribute(
+											"skuOptions"));
+
+							if (jsonArray == null) {
+								jsonArray = _getClonedJSONArray(
+									cpDefinitionOptionRel,
+									cpDefinitionOptionValueRel,
+									selectedCPInstance.getCPInstanceId());
+							}
+
+							if (jsonArray != null) {
+								commerceOptionValues =
+									_commerceOptionValueHelper.
+										getCPDefinitionCommerceOptionValues(
+											cpDefinitionOptionRel.
+												getCPDefinitionId(),
+											jsonArray.toString());
+							}
+
+							CPDefinition cpDefinition =
+								cpInstance.getCPDefinition();
 
 							String corEntryInfoMessage =
 								_getCOREntryInfoMessage(
 									commerceOptionValues, cpDefinitionOptionRel,
 									cpDefinitionOptionValueRel, cpInstance,
+									cpDefinition.getCProductId(),
 									dtoConverterContext);
 
 							if (Validator.isNotNull(corEntryInfoMessage)) {
@@ -168,7 +193,7 @@ public class ProductOptionValueDTOConverter
 								_getCPDefinitionLinkInfoMessage(
 									commerceOptionValues,
 									cpDefinitionOptionValueRel.getKey(),
-									cpInstance, dtoConverterContext, false);
+									cpDefinition, dtoConverterContext);
 
 							if (Validator.isNotNull(
 									cpDefinitionLinkInfoMessage)) {
@@ -206,7 +231,7 @@ public class ProductOptionValueDTOConverter
 
 						JSONArray clonedJSONArray = _getClonedJSONArray(
 							cpDefinitionOptionRel, cpDefinitionOptionValueRel,
-							selectedCPInstance);
+							selectedCPInstance.getCPInstanceId());
 
 						if (clonedJSONArray == null) {
 							return null;
@@ -222,6 +247,17 @@ public class ProductOptionValueDTOConverter
 								_cpDefinitionOptionValueRelLocalService.
 									getCPDefinitionOptionValueRel(
 										productOptionValueId);
+
+						long selectedCPDefinitionOptionRelId =
+							selectedCPDefinitionOptionValueRel.
+								getCPDefinitionOptionRelId();
+
+						if (selectedCPDefinitionOptionRelId !=
+								cpDefinitionOptionValueRel.
+									getCPDefinitionOptionRelId()) {
+
+							return null;
+						}
 
 						CommerceProductOptionValueRelativePriceRequest.Builder
 							builder =
@@ -261,9 +297,7 @@ public class ProductOptionValueDTOConverter
 						}
 
 						if (FeatureFlagManagerUtil.isEnabled(
-								"COMMERCE-11922") &&
-							cpDefinitionOptionRelConfiguration.
-								showUnselectableOptions()) {
+								"COMMERCE-11922")) {
 
 							Long skuId = (Long)dtoConverterContext.getAttribute(
 								"skuId");
@@ -279,31 +313,48 @@ public class ProductOptionValueDTOConverter
 								return true;
 							}
 
-							JSONArray selectedJSONArray =
-								CPJSONUtil.toJSONArray(
-									_cpDefinitionOptionRelLocalService.
-										getCPDefinitionOptionRelKeysCPDefinitionOptionValueRelKeys(
-											selectedCPInstance.
-												getCPInstanceId()));
-
 							List<CommerceOptionValue> commerceOptionValues =
-								_commerceOptionValueHelper.
-									getCPDefinitionCommerceOptionValues(
-										selectedCPInstance.getCPDefinitionId(),
-										selectedJSONArray.toString());
+								new ArrayList<>();
+
+							JSONArray jsonArray =
+								_getSelectedSkuOptionsJSONArray(
+									cpDefinitionOptionRel,
+									cpDefinitionOptionValueRel,
+									(SkuOption[])
+										dtoConverterContext.getAttribute(
+											"skuOptions"));
+
+							if (jsonArray == null) {
+								jsonArray = _getClonedJSONArray(
+									cpDefinitionOptionRel,
+									cpDefinitionOptionValueRel,
+									selectedCPInstance.getCPInstanceId());
+							}
+
+							if (jsonArray != null) {
+								commerceOptionValues =
+									_commerceOptionValueHelper.
+										getCPDefinitionCommerceOptionValues(
+											cpDefinitionOptionRel.
+												getCPDefinitionId(),
+											jsonArray.toString());
+							}
+
+							CPDefinition cpDefinition =
+								cpInstance.getCPDefinition();
 
 							if (Validator.isNotNull(
 									_getCOREntryInfoMessage(
 										commerceOptionValues,
 										cpDefinitionOptionRel,
 										cpDefinitionOptionValueRel, cpInstance,
+										cpDefinition.getCProductId(),
 										dtoConverterContext)) ||
 								Validator.isNotNull(
 									_getCPDefinitionLinkInfoMessage(
 										commerceOptionValues,
 										cpDefinitionOptionValueRel.getKey(),
-										cpInstance, dtoConverterContext,
-										true))) {
+										cpDefinition, dtoConverterContext))) {
 
 								return false;
 							}
@@ -338,7 +389,7 @@ public class ProductOptionValueDTOConverter
 
 						JSONArray clonedJSONArray = _getClonedJSONArray(
 							cpDefinitionOptionRel, cpDefinitionOptionValueRel,
-							selectedCPInstance);
+							selectedCPInstance.getCPInstanceId());
 
 						if (clonedJSONArray == null) {
 							return true;
@@ -362,13 +413,13 @@ public class ProductOptionValueDTOConverter
 	private JSONArray _getClonedJSONArray(
 			CPDefinitionOptionRel cpDefinitionOptionRel,
 			CPDefinitionOptionValueRel cpDefinitionOptionValueRel,
-			CPInstance cpInstance)
+			long cpInstanceId)
 		throws PortalException {
 
 		JSONArray jsonArray = CPJSONUtil.toJSONArray(
 			_cpDefinitionOptionRelLocalService.
 				getCPDefinitionOptionRelKeysCPDefinitionOptionValueRelKeys(
-					cpInstance.getCPInstanceId()));
+					cpInstanceId));
 
 		JSONArray clonedJSONArray = _jsonFactory.createJSONArray(
 			jsonArray.toString());
@@ -387,7 +438,8 @@ public class ProductOptionValueDTOConverter
 			List<CommerceOptionValue> commerceOptionValues,
 			CPDefinitionOptionRel cpDefinitionOptionRel,
 			CPDefinitionOptionValueRel cpDefinitionOptionValueRel,
-			CPInstance cpInstance, DTOConverterContext dtoConverterContext)
+			CPInstance cpInstance, long cProductId,
+			DTOConverterContext dtoConverterContext)
 		throws Exception {
 
 		String infoMessage = null;
@@ -428,21 +480,45 @@ public class ProductOptionValueDTOConverter
 			COREntryConstants.TYPE_PRODUCTS_LIMIT, QueryUtil.ALL_POS,
 			QueryUtil.ALL_POS);
 
+		List<Long> cProductIds = new ArrayList<>();
+
 		for (COREntry corEntry : corEntries) {
 			if (!corEntryType.evaluate(corEntry, corEntryTypeItems)) {
-				infoMessage = corEntryType.getErrorMessage(
-					corEntry, null, dtoConverterContext.getLocale());
+				if (infoMessage == null) {
+					infoMessage = corEntryType.getErrorMessage(
+						corEntry, null, dtoConverterContext.getLocale());
+				}
+
+				UnicodeProperties typeSettingsUnicodeProperties =
+					UnicodePropertiesBuilder.fastLoad(
+						corEntry.getTypeSettings()
+					).build();
+
+				cProductIds.addAll(
+					TransformUtil.transform(
+						StringUtil.split(
+							typeSettingsUnicodeProperties.getProperty(
+								COREntryConstants.
+									TYPE_PRODUCTS_LIMIT_FIELD_PRODUCT_IDS)),
+						curCProductId -> Long.valueOf(curCProductId)));
 			}
 		}
 
-		return infoMessage;
+		if (cProductIds.contains(cProductId)) {
+			return infoMessage;
+		}
+
+		return null;
 	}
 
 	private String _getCPDefinitionLinkInfoMessage(
 			List<CommerceOptionValue> commerceOptionValues,
-			String cpDefinitionOptionValueRelKey, CPInstance cpInstance,
-			DTOConverterContext dtoConverterContext, boolean exclude)
+			String cpDefinitionOptionValueRelKey, CPDefinition cpDefinition,
+			DTOConverterContext dtoConverterContext)
 		throws Exception {
+
+		String languageId = _language.getLanguageId(
+			dtoConverterContext.getLocale());
 
 		for (CommerceOptionValue commerceOptionValue : commerceOptionValues) {
 			if (Objects.equals(
@@ -457,68 +533,69 @@ public class ProductOptionValueDTOConverter
 				_cpInstanceLocalService.getCPInstance(
 					commerceOptionValue.getCPInstanceId());
 
-			List<CPDefinitionLink> excludeCPDefinitionLinks =
+			List<CPDefinitionLink> incompatibleInBundleCPDefinitionLinks =
 				_cpDefinitionLinkLocalService.getCPDefinitionLinks(
 					commerceOptionValueCPInstance.getCPDefinitionId(),
-					CPDefinitionLinkTypeConstants.EXCLUDE,
+					CPDefinitionLinkTypeConstants.INCOMPATIBLE_IN_BUNDLE,
 					WorkflowConstants.STATUS_APPROVED);
 
-			for (CPDefinitionLink cpDefinitionLink : excludeCPDefinitionLinks) {
+			for (CPDefinitionLink cpDefinitionLink :
+					incompatibleInBundleCPDefinitionLinks) {
+
 				CProduct cProduct = cpDefinitionLink.getCProduct();
 
-				if (cpInstance.getCPDefinitionId() ==
+				if (cpDefinition.getCPDefinitionId() ==
 						cProduct.getPublishedCPDefinitionId()) {
 
-					CPDefinition cpDefinition = cpInstance.getCPDefinition();
-					CPDefinition publishedCPDefinition =
-						_cpDefinitionLocalService.getCPDefinition(
-							cProduct.getPublishedCPDefinitionId());
-
-					String languageId = _language.getLanguageId(
-						dtoConverterContext.getLocale());
+					CPDefinition linkedCPDefinition =
+						cpDefinitionLink.getCPDefinition();
 
 					return _language.format(
 						dtoConverterContext.getLocale(),
 						"x-cannot-be-combined-with-x",
 						new String[] {
 							cpDefinition.getName(languageId),
-							publishedCPDefinition.getName(languageId)
+							linkedCPDefinition.getName(languageId)
 						});
 				}
 			}
+		}
 
-			if (exclude) {
-				continue;
-			}
+		List<CPDefinitionLink> requiresInBundleCPDefinitionLinks =
+			_cpDefinitionLinkLocalService.getCPDefinitionLinks(
+				cpDefinition.getCPDefinitionId(),
+				CPDefinitionLinkTypeConstants.REQUIRES_IN_BUNDLE,
+				WorkflowConstants.STATUS_APPROVED);
 
-			List<CPDefinitionLink> includeCPDefinitionLinks =
-				_cpDefinitionLinkLocalService.getCPDefinitionLinks(
-					commerceOptionValueCPInstance.getCPDefinitionId(),
-					CPDefinitionLinkTypeConstants.INCLUDE,
-					WorkflowConstants.STATUS_APPROVED);
+		for (CPDefinitionLink cpDefinitionLink :
+				requiresInBundleCPDefinitionLinks) {
 
-			for (CPDefinitionLink cpDefinitionLink : includeCPDefinitionLinks) {
-				CProduct cProduct = cpDefinitionLink.getCProduct();
+			CProduct cProduct = cpDefinitionLink.getCProduct();
 
-				if (cpInstance.getCPDefinitionId() ==
-						cProduct.getPublishedCPDefinitionId()) {
+			List<Long> cpDefinitionIds = TransformUtil.transform(
+				ListUtil.filter(
+					TransformUtil.transform(
+						commerceOptionValues,
+						commerceOptionValue ->
+							_cpInstanceLocalService.fetchCPInstance(
+								commerceOptionValue.getCPInstanceId())),
+					Objects::nonNull),
+				CPInstanceModel::getCPDefinitionId);
 
-					CPDefinition cpDefinition = cpInstance.getCPDefinition();
-					CPDefinition publishedCPDefinition =
-						_cpDefinitionLocalService.getCPDefinition(
-							cProduct.getPublishedCPDefinitionId());
+			if (!cpDefinitionIds.contains(
+					cProduct.getPublishedCPDefinitionId())) {
 
-					String languageId = _language.getLanguageId(
-						dtoConverterContext.getLocale());
+				CPDefinition linkedCPDefinition =
+					_cpDefinitionLocalService.getCPDefinition(
+						cProduct.getPublishedCPDefinitionId());
 
-					return _language.format(
-						dtoConverterContext.getLocale(),
-						"x-requires-product-x-to-be-purchased-also",
-						new String[] {
-							cpDefinition.getName(languageId),
-							publishedCPDefinition.getName(languageId)
-						});
-				}
+				return _language.format(
+					dtoConverterContext.getLocale(),
+					"x-requires-x-to-be-purchased-also",
+					new String[] {
+						cpDefinition.getName(languageId),
+						linkedCPDefinition.getName(languageId)
+					});
 			}
 		}
 
@@ -542,6 +619,44 @@ public class ProductOptionValueDTOConverter
 				cpDefinitionInventory);
 
 		return cpDefinitionInventoryEngine.getMinOrderQuantity(cpInstance);
+	}
+
+	private JSONArray _getSelectedSkuOptionsJSONArray(
+		CPDefinitionOptionRel cpDefinitionOptionRel,
+		CPDefinitionOptionValueRel cpDefinitionOptionValueRel,
+		SkuOption[] skuOptions) {
+
+		if (skuOptions == null) {
+			return null;
+		}
+
+		JSONArray jsonArray = _jsonFactory.createJSONArray();
+
+		for (SkuOption skuOption : skuOptions) {
+			JSONObject jsonObject = _jsonFactory.createJSONObject();
+
+			if (Objects.equals(
+					cpDefinitionOptionRel.getKey(),
+					skuOption.getSkuOptionKey())) {
+
+				jsonObject.put(
+					"key", skuOption.getSkuOptionKey()
+				).put(
+					"value", cpDefinitionOptionValueRel.getKey()
+				);
+			}
+			else {
+				jsonObject.put(
+					"key", skuOption.getSkuOptionKey()
+				).put(
+					"value", skuOption.getSkuOptionValueKey()
+				);
+			}
+
+			jsonArray.put(jsonObject);
+		}
+
+		return jsonArray;
 	}
 
 	private boolean _updateJSONArray(
