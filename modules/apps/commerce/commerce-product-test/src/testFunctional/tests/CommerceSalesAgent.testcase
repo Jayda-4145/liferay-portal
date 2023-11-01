@@ -404,7 +404,7 @@ definition {
 	@description = "COMMERCE-12693. As a Sales Agent, I cannot view or manage channel defaults of the account without the Update and View Channel Defaults permissions"
 	@priority = 3
 	test CannotSalesAgentWithoutPermissionsViewAndManageChannelDefaults {
-		property portal.acceptance = "false";
+		property portal.acceptance = "jayda";
 
 		task ("Given the admin creates two business types of accounts and assigns account 1 to Sales Agent") {
 			for (var index : list "1,2") {
@@ -723,7 +723,7 @@ definition {
 	@description = "COMMERCE-12692. As a Sales Agent, I can view and manage channel defaults of the account with the required permissions assigned"
 	@priority = 5
 	test CanSalesAgentWithPermissionManageChannelDefaults {
-		property portal.acceptance = "true";
+		property portal.acceptance = "jayda";
 
 		task ("Given the Sales Agent has manage entries permissions under Channel Defaults tab") {
 			for (var resourceLists : list "com.liferay.account.model.AccountEntry:UPDATE,com.liferay.account.model.AccountEntry:MANAGE_CHANNEL_DEFAULTS,com.liferay.commerce.product.model.CommerceChannel:VIEW,com.liferay.commerce.price.list.model.CommercePriceList:VIEW,com_liferay_commerce_currency:MANAGE_CURRENCIES,com.liferay.commerce.term.model.CommerceTermEntry:VIEW,com.liferay.commerce.term:VIEW_TERM_ENTRY,com.liferay.commerce.discount.model.CommerceDiscount:VIEW,com.liferay.commerce.discount:VIEW_DISCOUNTS,com.liferay.portal.kernel.model.User:VIEW") {
@@ -892,7 +892,7 @@ definition {
 	@description = "COMMERCE-12691. As a Sales Agent, I can view the channel defaults of the account with the Update and View Channel Defaults permissions"
 	@priority = 5
 	test CanSalesAgentWithPermissionViewChannelDefaults {
-		property portal.acceptance = "true";
+		property portal.acceptance = "jayda";
 
 		task ("Given the Sales Agent has Update and View Channel Defaults permissions for Account Entry") {
 			for (var permissions : list "UPDATE,VIEW_CHANNEL_DEFAULTS") {
