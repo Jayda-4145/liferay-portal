@@ -749,13 +749,13 @@ definition {
 			LexiconEntry.gotoEntry(rowEntry = "Commerce Account 1");
 
 			Account.assignUsers(
-				accountName = "Commerce Account",
+				accountName = "Commerce Account 1",
 				assigneeName = "sales.agent@liferay.com");
 		}
 
 		task ("And the account addressed are added") {
 			CommerceJSONAccountsAPI._addCommerceAccountAddress(
-				accountEntryName = "Commerce Account",
+				accountEntryName = "Commerce Account 1",
 				city = "Test City",
 				countryISOCode = "US",
 				name = "Test Address",
@@ -815,7 +815,7 @@ definition {
 			}
 
 			for (var entryNames : list "ShippingOption,PaymentMethod") {
-				AssertElementNotPresent(
+				AssertElementPresent(
 					key_firstColumnValue = "Minium Portal",
 					key_secondColumnValue = "Use Priority Settings",
 					key_table = ${entryNames},
@@ -939,7 +939,7 @@ definition {
 
 			CommerceEntry.gotoMenuTab(menuTab = "Channel Defaults");
 
-			for (var entryHeaders : list "Billing Addresses,Shipping Addresses,Delivery Terms And Conditions,Payment Terms And Conditions,Shipping Options,Price Lists,Discounts,Currencies,Payment Methods,Channel Account Managers") {
+			for (var entryHeaders : list "Billing Addresses,Shipping Addresses,Delivery Terms and Conditions,Payment Terms and Conditions,Shipping Options,Price Lists,Discounts,Currencies,Payment Methods,Channel Account Managers") {
 				AssertVisible(
 					key_title = ${entryHeaders},
 					locator1 = "Header#H3_TITLE");
@@ -961,6 +961,10 @@ definition {
 					key_secondColumnValue = "Use Priority Settings",
 					key_table = ${entryNames},
 					locator1 = "CommerceEntry#TABLE_ASSERT_TWO_COLUMNS_EDIT_BUTTON");
+
+				AssertVisible(
+					key_termType = ${entryNames},
+					locator1 = "Account#DEFAULT_ACCOUNT_TERMS_AND_CONDITION_EMPTY_SEARCH_CONTAINER");
 			}
 		}
 	}
