@@ -832,7 +832,7 @@ definition {
 	@priority = 5
 	test CanUserWithAccountAdministratorRoleViewAndManageChannelDefaults {
 		property custom.properties = "jsonws.web.service.paths.excludes=";
-		property portal.acceptance = "jayda";
+		property portal.acceptance = "true";
 
 		task ("Given a Minium site is created") {
 			CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
@@ -919,7 +919,7 @@ definition {
 	@priority = 5
 	test CanUserWithAccountManagerRoleViewAndManageChannelDefaults {
 		property custom.properties = "jsonws.web.service.paths.excludes=";
-		property portal.acceptance = "jayda";
+		property portal.acceptance = "true";
 
 		task ("Given a Minium site is created") {
 			CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
