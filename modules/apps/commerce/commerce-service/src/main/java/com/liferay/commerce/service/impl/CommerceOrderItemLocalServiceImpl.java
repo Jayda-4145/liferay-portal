@@ -1368,7 +1368,7 @@ public class CommerceOrderItemLocalServiceImpl
 
 		_validate(
 			serviceContext.getLocale(), commerceOrder, cpDefinition, cpInstance,
-			quantity, unitOfMeasureKey,
+			json, quantity, unitOfMeasureKey,
 			GetterUtil.getBoolean(
 				serviceContext.getAttribute("validateOrder"), true));
 
@@ -2292,7 +2292,7 @@ public class CommerceOrderItemLocalServiceImpl
 
 		_validate(
 			serviceContext.getLocale(), commerceOrder, cpDefinition, cpInstance,
-			quantity, unitOfMeasureKey,
+			commerceOrderItem.getJson(), quantity, unitOfMeasureKey,
 			GetterUtil.getBoolean(
 				serviceContext.getAttribute("validateOrder"), true));
 
@@ -2361,7 +2361,7 @@ public class CommerceOrderItemLocalServiceImpl
 		_validate(
 			serviceContext.getLocale(), commerceOrder,
 			commerceOrderItem.getCPDefinition(),
-			commerceOrderItem.fetchCPInstance(), quantity,
+			commerceOrderItem.fetchCPInstance(), json, quantity,
 			commerceOrderItem.getUnitOfMeasureKey(),
 			GetterUtil.getBoolean(
 				serviceContext.getAttribute("validateOrder"), true));
@@ -2424,7 +2424,7 @@ public class CommerceOrderItemLocalServiceImpl
 		_validate(
 			serviceContext.getLocale(), commerceOrder,
 			commerceOrderItem.getCPDefinition(),
-			commerceOrderItem.fetchCPInstance(), quantity,
+			commerceOrderItem.fetchCPInstance(), json, quantity,
 			commerceOrderItem.getUnitOfMeasureKey(),
 			GetterUtil.getBoolean(
 				serviceContext.getAttribute("validateOrder"), true));
@@ -2466,7 +2466,7 @@ public class CommerceOrderItemLocalServiceImpl
 
 	private void _validate(
 			Locale locale, CommerceOrder commerceOrder,
-			CPDefinition cpDefinition, CPInstance cpInstance,
+			CPDefinition cpDefinition, CPInstance cpInstance, String json,
 			BigDecimal quantity, String unitOfMeasureKey, boolean validateOrder)
 		throws PortalException {
 
@@ -2521,7 +2521,7 @@ public class CommerceOrderItemLocalServiceImpl
 		if (!ExportImportThreadLocal.isImportInProcess() && validateOrder) {
 			List<CommerceOrderValidatorResult> commerceCartValidatorResults =
 				_commerceOrderValidatorRegistry.validate(
-					locale, commerceOrder, cpInstance, quantity);
+					locale, commerceOrder, cpInstance, json, quantity);
 
 			if (!commerceCartValidatorResults.isEmpty()) {
 				throw new CommerceOrderValidatorException(
