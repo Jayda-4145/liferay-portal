@@ -513,7 +513,9 @@ definition {
 	@description = "This is s test for COMMERCE-12375. As a guest, I want to be able to view order details in the pending orders page"
 	@priority = 5
 	test CanGuestUserViewOrderDetailsInPendingOrdersPage {
-		property portal.acceptance = "true";
+		property portal.acceptance = "jayda";
+		property test.liferay.virtual.instance = "false";
+		property test.run.type = "single";
 
 		task ("Given a Minium site is created") {
 			CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
