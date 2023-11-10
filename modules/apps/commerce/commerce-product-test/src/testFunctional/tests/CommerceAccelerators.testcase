@@ -568,7 +568,7 @@ definition {
 		}
 
 		task ("Then the guest user can view an order entry in the pending order page") {
-			Navigator.openWithAppendToBaseURL(urlAppend = "web/minium/pending-orders");
+			CommerceNavigator.gotoMiniumSidebarItem(menuItem = "Pending Orders");
 
 			AssertElementPresent(
 				key_orderAuthor = "",
