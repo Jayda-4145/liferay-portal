@@ -800,6 +800,149 @@ definition {
 			tagName = "Engine");
 	}
 
+	@description = "This is s test for COMMERCE-12864. As an admin, I want to be able to view the separate orders belonging to guest users in the Pending Orders page"
+	@priority = 5
+	test CanViewSeparateOrdersFromGuestUsersInPendingOrdersPage {
+		property portal.acceptance = "jayda";
+
+		task ("Given a Minium site with an account is created") {
+			CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
+
+			JSONAccountEntry.addAccountEntry(
+				accountEntryName = "Commerce Account 1",
+				accountEntryType = "Business");
+		}
+
+		task ("And guest checkout is enabled for the site") {
+			CommerceChannels.openChannelsAdmin();
+
+			CommerceNavigator.gotoEntry(entryName = "Minium Portal");
+
+			Check.checkToggleSwitch(
+				key_toggleSwitchLabel = "Guest Checkout",
+				locator1 = "ToggleSwitch#ANY_TOGGLE_SWITCH");
+
+			Button.clickSave();
+		}
+
+		task ("And a SAP is created to view the pending order for guest users") {
+			ServiceAccessPolicy.openServiceAccessPolicyAdmin();
+
+			ServiceAccessPolicy.addServiceAccessPolicy(
+				defaultSwitch = "true",
+				enabled = "true",
+				methodName = "getFDSData",
+				policyName = "FDSApplication_getFDSData",
+				serviceClass = "com.liferay.frontend.data.set.taglib.internal.jaxrs.application.FDSApplication",
+				title = "FDSApplication_getFDSData");
+		}
+
+		task ("And the View permission of Catalog and Pending Orders pages for Guest are checked") {
+			for (var pageName : list "Catalog,Pending Orders") {
+				PagesAdmin.openPagesAdmin(siteURLKey = "minium");
+
+				PagesAdmin.gotoPageEllipsisMenuItem(
+					menuItem = "Permissions",
+					pageName = ${pageName});
+
+				Role.definePermissionPG(
+					permissionDefinitionKey = "CONFIGURATION_PERMISSIONS_VIEW_CHECKBOX",
+					roleTitle = "guest");
+			}
+		}
+
+		task ("When a guest adds a product to the cart in an incognito Catalog page") {
+			RobotType.robotTypeShortcut(locator1 = "Ctrl + Shift + n");
+
+			SelectWindow.selectPopUp(value1 = "null");
+
+			Navigator.openWithAppendToBaseURL(urlAppend = "web/minium/catalog");
+
+			WaitForElementPresent(
+				key_productName = "U-Joint",
+				locator1 = "CommerceAccelerators#ADD_TO_CART_BUTTON");
+
+			Click(
+				key_productName = "U-Joint",
+				locator1 = "CommerceAccelerators#ADD_TO_CART_BUTTON");
+
+			WaitForElementPresent(
+				key_itemCount = 1,
+				locator1 = "CommerceAccelerators#MINI_CART_BUTTON_DATA_BADGE_COUNT");
+
+			var orderId = CommerceJSONOrdersAPI._getCommerceOrderIds(orderCount = 1);
+		}
+
+		task ("Then the guest can view an order entry with an empty account in the Pending Orders page") {
+			Navigator.openWithAppendToBaseURL(urlAppend = "web/minium/pending-orders");
+
+			AssertElementPresent(
+				key_orderAuthor = "",
+				locator1 = "CommerceAccelerators#ORDERS_ENTRY_VIEW_BUTTON");
+
+			AssertElementPresent(
+				key_columnNumber = 3,
+				key_productName = ${orderId},
+				key_value = "",
+				locator1 = "CommerceEntry#TABLE_SEARCH_BY_NAME_AND_COLUMN_CONTENT");
+		}
+
+		task ("And can see the order account id is '-1' in the order entry's details by clicking the VIEW button") {
+			Button.click(button = "View");
+
+			AssertTextEquals(
+				key_priceName = "Account ID",
+				locator1 = "CommerceOrders#ORDER_PRICES_SEPARETED",
+				value1 = "-1");
+		}
+
+		task ("When the incognito page is closed and the admin navigates to the Catalog page") {
+			Close.closeWindow();
+
+			Navigator.openWithAppendToBaseURL(urlAppend = "web/minium/catalog");
+		}
+
+		task ("Then can view the account selector with the default account 'Commerce Account 1' but no order is selected") {
+			AssertTextEquals(
+				locator1 = "CommerceFrontStore#ACCOUNT_SELECTOR_SELECTED_ACCOUNT",
+				value1 = "Commerce Account 1");
+
+			AssertElementNotPresent(
+				locator1 = "CommerceEntry#ACTIVE_ORDER_ID",
+				value1 = ${orderId});
+
+			AssertTextEquals(
+				key_labelName = "There is no order selected.",
+				locator1 = "ObjectAdmin#VIEW_SIMPLE_TEXT_GENERIC",
+				value1 = "There is no order selected.");
+		}
+
+		task ("And no order item is added to the cart for the admin") {
+			AssertElementNotPresent(
+				key_itemCount = 1,
+				locator1 = "CommerceAccelerators#MINI_CART_BUTTON_DATA_BADGE_COUNT");
+		}
+
+		task ("And can view an order entry that belongs to the guest user with an empty account in the Pending Orders page") {
+			Navigator.openWithAppendToBaseURL(urlAppend = "web/minium/pending-orders");
+
+			AssertElementPresent(
+				key_columnNumber = 3,
+				key_productName = ${orderId},
+				key_value = "",
+				locator1 = "CommerceEntry#TABLE_SEARCH_BY_NAME_AND_COLUMN_CONTENT");
+		}
+
+		task ("And can view the order account id is '-1' in the order entry's details by clicking the VIEW button") {
+			Button.click(button = "View");
+
+			AssertTextEquals(
+				key_priceName = "Account ID",
+				locator1 = "CommerceOrders#ORDER_PRICES_SEPARETED",
+				value1 = "-1");
+		}
+	}
+
 	@description = "This is a test for COMMERCE-4958."
 	@priority = 5
 	test CheckoutWithDefaultShippingOption {
